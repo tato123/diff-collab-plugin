@@ -1,0 +1,141 @@
+import React, { useEffect, useRef } from "react";
+import styled from "styled-components";
+import Page from "./Page";
+import Video from "./Video";
+import Sketch from "./Sketch";
+
+const Container = styled.div`
+  display: grid;
+  grid-template-areas: ".";
+  grid-template-rows: 1fr;
+  grid-template-columns: 1fr;
+  height: 100%;
+  width: 100%;
+`;
+
+const Thumbnails = styled.div`
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  img {
+    width: 100%;
+    height: auto;
+  }
+
+  > div {
+    margin-bottom: 16px;
+  }
+
+  .thumbnail {
+    border: 1px solid #000;
+  }
+`;
+
+const Stage = styled.div`
+  background: #fafafa;
+
+  .img-resize {
+    width: 100%;
+    height: auto;
+  }
+
+  svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  foreignObject {
+    width: 100%;
+    height: 100%;
+  }
+`;
+
+const Room = ({ match }) => {
+  const canvasRef = useRef(null);
+
+  function getMousePos(canvas, evt) {
+    var rect = canvas.getBoundingClientRect();
+    return {
+      x: evt.clientX - rect.left,
+      y: evt.clientY - rect.top
+    };
+  }
+
+  const setup = (p5, parent) => {
+    const stageImage = document.getElementById("stageImage");
+
+    const elm = window.getComputedStyle(stageImage);
+
+    const width = parseInt(elm.width.substring(0, elm.width.indexOf("px")));
+    const height = parseInt(elm.height.substring(0, elm.height.indexOf("px")));
+
+    p5.createCanvas(width, height).parent(parent);
+    const fo = document.getElementById("fobj");
+    fo.style.width = width;
+    fo.style.height = height;
+  };
+  const draw = p5 => {
+    // p5.ellipse(70, 70, 70, 70);
+  };
+
+  const mouseDragged = p5 => {
+    p5.strokeWeight(1);
+
+    p5.line(p5.mouseX, p5.mouseY, p5.pmouseX, p5.pmouseY);
+
+    console.log(p5.mouseX, p5.mouseY, p5.pmouseX, p5.pmouseY);
+  };
+
+  useEffect(() => {
+    window.addEventListener("mousemove", evt => {
+      console.log(evt.clientX, evt.clientY);
+    });
+  });
+
+  // useEffect(() => {
+  //   if (canvasRef) {
+  //     var ctx = canvasRef.current.getContext("2d");
+  //     var img = new Image();
+  //     img.onload = function() {
+  //       ctx.drawImage(
+  //         img,
+  //         0,
+  //         0,
+  //         img.width,
+  //         img.height,
+  //         0,
+  //         0,
+  //         canvasRef.current.width,
+  //         canvasRef.current.height
+  //       ); // Or at whatever offset you like
+  //     };
+  //     img.src = "/rendering.svg";
+  //   }
+  // }, [canvasRef]);
+
+  return (
+    <Page>
+      <Container>
+        <Stage>
+          <svg preserveAspectRatio="xMidYMid meet">
+            <image
+              id="stageImage"
+              x="0"
+              y="0"
+              preserveAspectRatio="xMidYMid meet"
+              width="1920"
+              height="1080"
+              href="/rendering.svg"
+            />
+
+            <foreignObject id="fobj">
+              <Sketch setup={setup} draw={draw} mouseDragged={mouseDragged} />
+            </foreignObject>
+          </svg>
+        </Stage>
+      </Container>
+    </Page>
+  );
+};
+
+export default Room;

@@ -1,0 +1,16 @@
+{
+  "id": "DIFF_COLLAB",
+  "name": "Diff Sharing",
+  "host": {
+    "app": "XD",
+    "minVersion": "18.0.0"
+  },
+  "version": "1.0.0",
+  "uiEntryPoints": [
+    {
+      "type": "menu",
+      "label": "Collaborate on Artboard",
+      "commandId": "createRectangle"
+    }
+  ]
+}
