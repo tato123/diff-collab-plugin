@@ -11,5 +11,6 @@
   },
   "scripts": {
     "start": "npx lerna run --parallel start"
-  }
+  },
+  "dependencies": {}
 }

@@ -47,12 +47,12 @@ async function exportRendition(selection) {
       data.append("image", images[i], images[i].name);
     }
 
-    const res = await Axios.get("http://localhost:8000/room/id");
+    const res = await Axios.get("http://localhost:8001/room/id");
     const roomId = res.data;
     console.log("room is", res.data);
 
     const roomUploadRes = await Axios.post(
-      `http://localhost:8000/media/${roomId}/upload`,
+      `http://localhost:8001/media/${roomId}/upload`,
       data,
       {
         headers: { "Content-Type": "multipart/form-data" }

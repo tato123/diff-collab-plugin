@@ -10,11 +10,13 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "aws-sdk": "^2.487.0",
+    "aws-sdk": "^2.496.0",
     "cors": "^2.8.5",
     "dotenv": "^8.0.0",
+    "dynamoose": "^1.10.0",
     "express": "^4.17.1",
     "multer": "^1.4.1",
+    "short-uuid": "^3.1.1",
     "twilio": "^3.33.0"
   },
   "devDependencies": {

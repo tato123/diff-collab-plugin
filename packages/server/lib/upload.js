@@ -2,50 +2,79 @@ const express = require("express");
 const router = express.Router();
 const multer = require("multer");
 const AWS = require("aws-sdk");
+const short = require("short-uuid");
+const Room = require("./db/Room");
+
+const S3 = new AWS.S3({
+  accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+  region: process.env.AWS_REGION
+});
+
+const BUCKET_NAME = process.env.AWS_BUCKET_NAME;
 
 const storage = multer.memoryStorage({
   destination: function(req, file, callback) {
     callback(null, "");
   }
 });
+
 const multipleUpload = multer({ storage: storage }).array("image");
+
 const upload = multer({ storage: storage }).single("image");
 
-router.post("/:roomid/upload", multipleUpload, (req, res) => {
-  console.log("Uploaded to room", req.params.roomid);
-  const file = req.files;
-  console.log(file);
-  let s3bucket = new AWS.S3({
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-    region: process.env.AWS_REGION
-  });
-  const ResponseData = [];
-  s3bucket.createBucket(() => {
-    //file storing array for response
+router.post("/:roomId/upload", multipleUpload, async (req, res) => {
+  try {
+    console.log("----------------[upload media]-------------");
+    const roomId = req.params.roomId;
+    console.log("RoomID: ", roomId);
+    const file = req.files;
+    console.log("Files: ", file.length);
+    const ResponseData = [];
 
-    console.log(process.env.AWS_BUCKET_NAME);
-    file.map(item => {
+    const promises = file.map(item => {
+      // generate a short name
+      const mediaId = short.generate();
+      const newFileName = `${mediaId}-${item.originalname}`;
+
+      // upload a file
       const params = {
-        Bucket: process.env.AWS_BUCKET_NAME,
-        Key: item.originalname,
+        Bucket: BUCKET_NAME,
+        Key: newFileName,
         Body: item.buffer,
         ACL: "public-read"
       };
-      s3bucket.upload(params, function(err, data) {
-        if (err) {
-          SentryErrorHandler(err);
-        } else if (data) {
-          console.log(data, "'im here'");
 
-          //send res socket here
-        }
+      return new Promise((resolve, reject) => {
+        S3.upload(params, (err, data) => {
+          if (err) {
+            console.error(err);
+            reject(err);
+          } else if (data) {
+            const fileURL = `https://s3.amazonaws.com/${BUCKET_NAME}/${newFileName}`;
+            // get the urls
+            console.log("File successfully uploaded...", fileURL);
+            resolve({
+              mediaId: mediaId,
+              url: fileURL
+            });
+          }
+        });
       });
-      console.log(ResponseData);
     });
 
-    res.status(200).send();
-  });
+    const media = await Promise.all(promises);
+    Room.update({ id: roomId }, { media }, err => {
+      if (err) {
+        console.error("An error occured updating room", err);
+        res.status(400).send(err);
+      } else {
+        res.status(200).send();
+      }
+    });
+  } catch (err) {
+    res.status(400).send(err.message);
+  }
 });
 
 module.exports = router;
