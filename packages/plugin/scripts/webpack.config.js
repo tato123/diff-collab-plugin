@@ -2,8 +2,11 @@ const CopyWebpackPlugin = require("copy-webpack-plugin");
 const path = require("path");
 const babel = require("./babel.config");
 const AdobeXdPlugin = require("./webpack.adobexd.plugin");
+const Dotenv = require("dotenv-webpack");
 
 const OUTPUT = path.resolve(__dirname, "../dist");
+const ENV_FILE = path.resolve(__dirname, `../.env.${process.env.NODE_ENV}`);
+console.log("Loading configuration", ENV_FILE);
 
 module.exports = {
   entry: {
@@ -37,5 +40,11 @@ module.exports = {
     application: "application",
     uxp: "uxp"
   },
-  plugins: [new CopyWebpackPlugin(["src/manifest.json"]), new AdobeXdPlugin()]
+  plugins: [
+    new Dotenv({
+      path: ENV_FILE
+    }),
+    new CopyWebpackPlugin(["src/manifest.json"]),
+    new AdobeXdPlugin()
+  ]
 };

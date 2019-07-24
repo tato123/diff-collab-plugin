@@ -69,6 +69,7 @@ router.post("/:roomId/upload", multipleUpload, async (req, res) => {
         console.error("An error occured updating room", err);
         res.status(400).send(err);
       } else {
+        console.log("Succesfully updated room");
         res.status(200).send();
       }
     });

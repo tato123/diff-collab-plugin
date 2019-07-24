@@ -15,4 +15,18 @@ router.get("/id", async (req, res) => {
   }
 });
 
+router.get("/:id/media", async (req, res) => {
+  try {
+    const roomId = req.params.id;
+    if (!roomId) {
+      res.status(400).send("No room defined");
+    }
+
+    const room = await Room.get({ id: roomId });
+    res.status(200).json(room.media);
+  } catch (err) {
+    res.status(400).send(err.message);
+  }
+});
+
 module.exports = router;

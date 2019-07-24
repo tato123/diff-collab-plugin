@@ -1,37 +1,23 @@
-import paper, { Layer, Path } from "paper";
-import React, { useRef, useEffect } from "react";
+import paper, { Layer, Path, Raster } from "paper";
+import React, { useRef, useEffect, useState } from "react";
 import styled from "styled-components";
 
 const Canvas = styled.canvas`
-  width: 1920px;
-  height: 100%;
+  width: 100%;
+  height: calc(100% - 5px);
 `;
 
 const usePaper = canvasRef => {
+  const [paperInstance, setPaperInstance] = useState(null);
+
   useEffect(() => {
     if (canvasRef) {
       // Create an empty project and a view for the canvas:
       paper.setup(canvasRef.current);
+      setPaperInstance(paper);
 
       var layer1 = paper.project.activeLayer;
       var layer2 = new Layer();
-
-      paper.projects[0].importSVG("/rendering.svg", item => {
-        console.log("loaded", paper.projects[0]);
-
-        layer2.activate();
-
-        // Create a Paper.js Path to draw a line into it:
-        var path = new paper.Path();
-        // Give the stroke a color
-        path.strokeColor = "black";
-        var start = new paper.Point(100, 100);
-        // Move to start and draw a line from there
-        path.moveTo(start);
-        // Note that the plus operator on Point objects does not work
-        // in JavaScript. Instead, we need to call the add() function:
-        path.lineTo(start.add([200, -50]));
-      });
 
       // Draw the view now:
       paper.view.draw();
@@ -68,11 +54,40 @@ const usePaper = canvasRef => {
       paper.view.onMouseDown = press;
     }
   }, [canvasRef]);
+
+  return [paperInstance];
 };
 
-const PaperElement = () => {
+const PaperElement = ({ image, zoom }) => {
   const myCanvas = useRef(null);
-  usePaper(myCanvas);
+  const [paper] = usePaper(myCanvas);
+
+  useEffect(() => {
+    if (paper) {
+      switch (zoom) {
+        case "25%":
+          paper.project.view.zoom = 0.25;
+          break;
+        case "50%":
+          paper.project.view.zoom = 0.5;
+          break;
+        case "75%":
+          paper.project.view.zoom = 0.75;
+          break;
+        case "100%":
+        default:
+          paper.project.view.zoom = 1;
+      }
+    }
+  }, [paper, zoom]);
+
+  useEffect(() => {
+    if (paper != null && image) {
+      paper.projects[0].importSVG(image, item => {
+        console.log("loaded", paper.projects[0]);
+      });
+    }
+  }, [paper, image]);
 
   return <Canvas ref={myCanvas} />;
 };

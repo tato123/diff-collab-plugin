@@ -2,64 +2,69 @@ const application = require("application");
 const fs = require("uxp").storage.localFileSystem;
 const shell = require("uxp").shell;
 const Axios = require("axios");
+const scenegraph = require("scenegraph");
 
-async function exportRendition(selection) {
-  // Exit if there's no selection
-  // For production plugins, providing feedback to the user is expected
-  if (selection.items.length === 0)
-    return console.log("No selection. Guide the user on what to do.");
-
-  // Get a folder by showing the user the system folder picker
+async function createRenditionSettings(documentRoot) {
   const folder = await fs.getTemporaryFolder();
 
-  // Exit if user doesn't select a folder
-  if (!folder) return console.log("User canceled folder picker.");
+  // Get all
+  let artboardList = [];
 
-  // Create a file that will store the rendition
-  const file = await folder.createFile("rendition.png", { overwrite: true });
+  await documentRoot.children.forEach(e => {
+    artboardList.push(e);
+  });
 
-  // Create options for rendering a PNG.
-  // Other file formats have different required options.
-  // See `application#createRenditions` docs for details.
-  const renditionOptions = [
-    {
-      node: selection.items[0],
+  const artboardChildren = artboardList.filter(node => {
+    return node instanceof scenegraph.Artboard;
+  });
+
+  const arr = artboardChildren.map(async item => {
+    const file = await folder.createFile(`${item.guid}.png`, {
+      overwrite: true
+    });
+
+    const settings = {
+      node: item,
       outputFile: file,
-      type: application.RenditionType.PNG,
-      scale: 2
-    }
-  ];
+      type: "png",
+      scale: 1
+    };
 
+    return settings;
+  });
+
+  return Promise.all(arr);
+}
+
+async function exportRendition(selection, documentRoot) {
   try {
+    const renditions = await createRenditionSettings(documentRoot);
+    console.log(renditions);
     // Create the rendition(s)
-    const results = await application.createRenditions(renditionOptions);
-    console.log(
-      `PNG rendition has been saved at ${results[0].outputFile.nativePath}`
-    );
+    const results = await application.createRenditions(renditions);
 
-    const images = [];
-    const entries = await folder.getEntries();
+    const images = results.map(result => result.outputFile);
 
-    entries.forEach(entry => images.push(entry));
+    console.log("results", results);
 
     const data = new FormData();
     for (let i = 0; i < images.length; i++) {
       data.append("image", images[i], images[i].name);
     }
 
-    const res = await Axios.get("http://localhost:8001/room/id");
+    const res = await Axios.get(`${process.env.API_SERVER}/room/id`);
     const roomId = res.data;
     console.log("room is", res.data);
 
     const roomUploadRes = await Axios.post(
-      `http://localhost:8001/media/${roomId}/upload`,
+      `${process.env.API_SERVER}/media/${roomId}/upload`,
       data,
       {
         headers: { "Content-Type": "multipart/form-data" }
       }
     );
     console.log("Completed upload");
-    shell.openExternal(`http://localhost:3000/room/${roomId}`);
+    shell.openExternal(`${process.env.WEB_URL}/room/${roomId}`);
   } catch (err) {
     // Exit if there's an error rendering.
     return console.log("Something went wrong. Let the user know.", err);

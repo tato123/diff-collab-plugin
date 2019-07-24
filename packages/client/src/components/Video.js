@@ -5,6 +5,7 @@ import Video, {
   createLocalTracks
 } from "twilio-video";
 import styled from "styled-components";
+import { Avatar } from "antd";
 
 const Container = styled.div`
   border-left: 1px solid #ccc;
@@ -21,6 +22,26 @@ const Container = styled.div`
     height: 100%;
     padding: 4px 20px;
   }
+
+  .avatar {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    z-index: 2;
+  }
+`;
+
+const Participants = styled.div`
+  position: absolute;
+  right: 16px;
+  display: flex;
+  flex: 1 auto;
+  top: 16px;
+
+  > .ant-avatar {
+    margin-right: 4px;
+    display: block;
+  }
 `;
 
 const TrackList = styled.div`
@@ -29,36 +50,8 @@ const TrackList = styled.div`
   flex: 1 auto;
 `;
 
-const participantConnected = parentDiv => participant => {
-  console.log('Participant "%s" connected', participant.identity);
-  const div = document.createElement("div");
-  div.id = participant.sid;
-  div.classList.add("track-container");
-
-  participant.on("trackSubscribed", track => trackSubscribed(div, track));
-  participant.tracks.forEach(track => trackSubscribed(div, track));
-  participant.on("trackUnsubscribed", trackUnsubscribed);
-
-  parentDiv.appendChild(div);
-};
-
-function participantDisconnected(participant) {
-  console.log('Participant "%s" disconnected', participant.identity);
-
-  participant.tracks.forEach(trackUnsubscribed);
-  document.getElementById(participant.sid).remove();
-}
-
-function trackSubscribed(div, track) {
-  div.appendChild(track.attach());
-}
-
-function trackUnsubscribed(track) {
-  track.detach().forEach(element => element.remove());
-}
-
 function getToken(identity) {
-  return fetch("http://localhost:8000/twilio/token").then(res => {
+  return fetch(`${process.env.REACT_APP_API_SERVER}/twilio/token`).then(res => {
     if (!res.ok) {
       throw new Error(res.status);
     }
@@ -67,7 +60,10 @@ function getToken(identity) {
 }
 
 async function setupLocalAudioAndVideoTracks(video) {
-  const audioAndVideoTrack = await createLocalTracks();
+  const audioAndVideoTrack = await createLocalTracks({
+    audio: true,
+    video: false
+  });
   audioAndVideoTrack.forEach(track => track.attach(video));
   return audioAndVideoTrack;
 }
@@ -110,6 +106,39 @@ const useRoomConnection = roomJoined => {
 
 const VideoComponent = ({ roomName }) => {
   const [room, setRoom] = useState();
+  const [participants, setPartipants] = useState([]);
+  const localMedia = useRef(null);
+  const trackList = useRef(null);
+
+  const participantConnected = participant => {
+    setPartipants(s => [...s, participant]);
+
+    console.log('Participant "%s" connected', participant.identity);
+    const div = document.createElement("div");
+    div.id = participant.sid;
+    div.classList.add("track-container");
+
+    participant.on("trackSubscribed", track => trackSubscribed(div, track));
+    participant.tracks.forEach(track => trackSubscribed(div, track));
+    participant.on("trackUnsubscribed", trackUnsubscribed);
+
+    trackList.current.appendChild(div);
+  };
+
+  const participantDisconnected = participant => {
+    console.log('Participant "%s" disconnected', participant.identity);
+
+    participant.tracks.forEach(trackUnsubscribed);
+    document.getElementById(participant.sid).remove();
+  };
+
+  const trackSubscribed = (div, track) => {
+    div.appendChild(track.attach());
+  };
+
+  const trackUnsubscribed = track => {
+    track.detach().forEach(element => element.remove());
+  };
 
   const disableVideo = () => {
     const participant = room.localParticipant;
@@ -141,19 +170,18 @@ const VideoComponent = ({ roomName }) => {
     attachTracks(tracks, container);
   };
 
-  const localMedia = useRef(null);
-  const trackList = useRef(null);
-
   useRoomConnection(room => {
     setRoom(room);
 
     console.log(localMedia);
-    attachParticipantTracks(room.localParticipant, localMedia);
+    // attachParticipantTracks(room.localParticipant, localMedia);
+
+    setPartipants(p => [...p, room.localParticipant]);
 
     console.log('Connected to Room with with name, "%s"', room.name);
     room.participants.forEach(participantConnected);
 
-    room.on("participantConnected", participantConnected(trackList.current));
+    room.on("participantConnected", participantConnected);
     room.on("participantDisconnected", participantDisconnected);
     room.once("disconnected", error =>
       room.participants.forEach(participantDisconnected)
@@ -165,8 +193,13 @@ const VideoComponent = ({ roomName }) => {
       <TrackList ref={trackList}>
         <div className="track-container" ref={localMedia} id="local-media" />
       </TrackList>
-      {/* <button onClick={disableVideo}>disable</button>
-      <button onClick={enableVideo}>Enable</button> */}
+      <Participants>
+        {participants.map(p => (
+          <Avatar style={{ color: "#f56a00", backgroundColor: "#fde3cf" }}>
+            U
+          </Avatar>
+        ))}
+      </Participants>
     </Container>
   );
 };
