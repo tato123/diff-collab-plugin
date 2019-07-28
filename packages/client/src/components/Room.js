@@ -58,14 +58,12 @@ const Room = ({ match }) => {
       .then(media => {
         console.log("media is", media);
         setMedia(media);
-
-        const urls = media.map(x => x.url);
-        setSelectedMedia(urls);
+        setSelectedMedia(media);
       })
       .catch(err => {
         console.error(err);
       });
-  }, []);
+  }, [roomId]);
 
   return (
     <Page>
@@ -73,23 +71,18 @@ const Room = ({ match }) => {
         <Stage>
           {/* <Paper images={selectedMedia} zoom={zoom} /> */}
 
-          <div style={{ display: "flex", flexWrap: "wrap" }}>
-            {selectedMedia &&
-              selectedMedia.map(src => (
-                <div
-                  key={src}
-                  style={{ width: "200px", height: 200, padding: 16 }}
-                >
-                  {/* <img
-                    style={{ width: "100%", height: "auto" }}
-                    src={src}
-                    alt="thumbnail"
-                  /> */}
-                  <Canvas width={200} height={200}>
-                    <Image url={src} scale={0.2} />
-                  </Canvas>
-                </div>
-              ))}
+          <div>
+            <Canvas width={1920} height={1080}>
+              {selectedMedia &&
+                selectedMedia.map(media => (
+                  <Image
+                    url={media.url}
+                    left={parseInt(media.x)}
+                    top={parseInt(media.y)}
+                    scale={0.8}
+                  />
+                ))}
+            </Canvas>
           </div>
         </Stage>
         <Toolbox>

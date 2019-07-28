@@ -8,7 +8,8 @@ class Image extends React.Component {
     canvas: PropTypes.object,
     url: PropTypes.string.isRequired,
     scale: PropTypes.number.isRequired,
-    top: PropTypes.number.isRequired
+    top: PropTypes.number.isRequired,
+    left: PropTypes.number
   };
 
   static defaultProps = {
@@ -23,7 +24,10 @@ class Image extends React.Component {
         img.scale(this.props.scale);
         this.props.canvas.add(img);
       },
-      options
+      {
+        left: Math.abs(options.left),
+        top: Math.abs(options.top)
+      }
     );
   }
 

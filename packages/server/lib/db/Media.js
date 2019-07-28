@@ -8,9 +8,15 @@ const schema = new Schema({
     required: true,
     hashKey: true
   },
-  created: Date
+  created: Date,
+  roomId: String,
+  url: String,
+  x: String,
+  y: String,
+  w: String,
+  h: String
 });
 
-const Model = dynamoose.model("Room", schema);
+const Model = dynamoose.model("Media", schema);
 
 module.exports = Model;
