@@ -83,8 +83,12 @@ const PaperElement = ({ image, zoom }) => {
 
   useEffect(() => {
     if (paper != null && image) {
-      paper.projects[0].importSVG(image, item => {
-        console.log("loaded", paper.projects[0]);
+      // paper.projects[0].importSVG(image, item => {
+      //   console.log("loaded", paper.projects[0]);
+      // });
+
+      var raster = new Raster({
+        source: "http://assets.paperjs.org/images/marilyn.jpg"
       });
     }
   }, [paper, image]);

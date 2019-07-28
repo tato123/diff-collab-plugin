@@ -4,6 +4,8 @@
   "private": true,
   "dependencies": {
     "antd": "^3.20.1",
+    "fabric": "^3.3.2",
+    "lodash": "^4.17.15",
     "p5": "^0.9.0",
     "paper": "^0.12.3",
     "pixi.js": "^5.0.4",

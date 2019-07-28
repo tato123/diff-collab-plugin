@@ -4,6 +4,8 @@ import Page from "./Page";
 import Video from "./Video";
 import Paper from "./Paper";
 import { Button, Select } from "antd";
+import Canvas from "./Canvas";
+import Image from "./Image";
 
 const { Option } = Select;
 
@@ -56,7 +58,9 @@ const Room = ({ match }) => {
       .then(media => {
         console.log("media is", media);
         setMedia(media);
-        setSelectedMedia(media[0]);
+
+        const urls = media.map(x => x.url);
+        setSelectedMedia(urls);
       })
       .catch(err => {
         console.error(err);
@@ -67,7 +71,26 @@ const Room = ({ match }) => {
     <Page>
       <Container>
         <Stage>
-          <Paper image={selectedMedia && selectedMedia.url} zoom={zoom} />
+          {/* <Paper images={selectedMedia} zoom={zoom} /> */}
+
+          <div style={{ display: "flex", flexWrap: "wrap" }}>
+            {selectedMedia &&
+              selectedMedia.map(src => (
+                <div
+                  key={src}
+                  style={{ width: "200px", height: 200, padding: 16 }}
+                >
+                  {/* <img
+                    style={{ width: "100%", height: "auto" }}
+                    src={src}
+                    alt="thumbnail"
+                  /> */}
+                  <Canvas width={200} height={200}>
+                    <Image url={src} scale={0.2} />
+                  </Canvas>
+                </div>
+              ))}
+          </div>
         </Stage>
         <Toolbox>
           <Button>Select</Button>
