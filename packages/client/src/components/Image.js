@@ -25,8 +25,8 @@ class Image extends React.Component {
         this.props.canvas.add(img);
       },
       {
-        left: Math.abs(options.left),
-        top: Math.abs(options.top)
+        left: options.left,
+        top: options.top
       }
     );
   }

@@ -1,35 +1,47 @@
-import React, { Fragment } from "react";
-import PropTypes from "prop-types";
+import React, { Fragment, useState, useEffect, useRef } from "react";
 import { fabric } from "fabric";
 
-class DesignCanvas extends React.Component {
-  static propTypes = {
-    width: PropTypes.number.isRequired,
-    height: PropTypes.number.isRequired
-  };
+const DesignCanvas = ({
+  width = 600,
+  height = 400,
+  center = [0, 0],
+  children
+}) => {
+  const [canvas, setCanvas] = useState();
+  const c = useRef();
 
-  static defaultProps = {
-    width: 600,
-    height: 400
-  };
+  useEffect(() => {
+    if (canvas) {
+      canvas.setWidth(width);
+      canvas.setHeight(height);
+      canvas.renderAll();
+    }
+  }, [canvas, width, height]);
 
-  state = {
-    canvas: null
-  };
-
-  componentDidMount() {
-    const canvas = new fabric.Canvas(this.c);
+  useEffect(() => {
+    const canvas = new fabric.Canvas(c.current);
 
     canvas.on("mouse:wheel", function(opt) {
-      let delta = opt.e.deltaY;
-      let pzoom = canvas.getZoom();
-      let zoom = pzoom + delta / 1920;
-      zoom =
-        zoom > pzoom ? Math.min(pzoom + 0.07, 2) : Math.max(pzoom - 0.07, 0.1);
+      let e = opt.e;
 
-      console.log(zoom);
+      if (e.ctrlKey === true) {
+        let delta = opt.e.deltaY;
+        let pzoom = canvas.getZoom();
+        let zoom = pzoom + delta / 1920;
+        zoom =
+          zoom > pzoom ? Math.max(pzoom - 0.1, 0.1) : Math.min(pzoom + 0.1, 2);
+        canvas.zoomToPoint({ x: opt.pointer.x, y: opt.pointer.y }, zoom);
+        opt.e.preventDefault();
+        opt.e.stopPropagation();
+        return;
+      }
 
-      canvas.zoomToPoint({ x: opt.pointer.x, y: opt.pointer.y }, zoom);
+      console.log(opt.e.deltaY);
+
+      this.viewportTransform[4] += opt.e.deltaX;
+      this.viewportTransform[5] += opt.e.deltaY;
+      this.requestRenderAll();
+      console.log(this.viewportTransform[4], this.viewportTransform[5]);
       opt.e.preventDefault();
       opt.e.stopPropagation();
     });
@@ -58,23 +70,31 @@ class DesignCanvas extends React.Component {
       this.selection = true;
     });
 
-    this.setState({ canvas });
-  }
+    setCanvas(canvas);
+  }, []);
 
-  render() {
-    const children = React.Children.map(this.props.children, child => {
-      return React.cloneElement(child, {
-        canvas: this.state.canvas
-      });
+  useEffect(() => {
+    if (canvas && center[0]) {
+      console.log("vals", center[0], center[1]);
+
+      canvas.absolutePan(new fabric.Point(center[0], center[1]));
+      canvas.requestRenderAll();
+
+      canvas.setZoom(0.09);
+    }
+  }, [canvas, center]);
+
+  const mchildren = React.Children.map(children, child => {
+    return React.cloneElement(child, {
+      canvas: canvas
     });
-    const { width, height } = this.props;
-    return (
-      <Fragment>
-        <canvas ref={c => (this.c = c)} width={width} height={height} />
-        {this.state.canvas && children}
-      </Fragment>
-    );
-  }
-}
+  });
+  return (
+    <Fragment>
+      <canvas ref={c} />
+      {canvas && mchildren}
+    </Fragment>
+  );
+};
 
 export default DesignCanvas;

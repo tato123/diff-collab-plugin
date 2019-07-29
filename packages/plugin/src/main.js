@@ -68,6 +68,8 @@ async function exportRendition(selection, documentRoot) {
     // console.log("Completed upload");
     // shell.openExternal(`${process.env.WEB_URL}/room/${roomId}`);
 
+    //
+
     images.forEach(async (image, idx) => {
       const data = new FormData();
       data.append("image", image, image.name);
@@ -86,10 +88,10 @@ async function exportRendition(selection, documentRoot) {
           }
         }
       );
-      console.log("Completed upload");
-       shell.openExternal(`${process.env.WEB_URL}/room/${roomId}`);
-
+      console.log(renditions[idx].node.name, gb.x, gb.y);
     });
+
+    shell.openExternal(`${process.env.WEB_URL}/room/${roomId}`);
   } catch (err) {
     // Exit if there's an error rendering.
     return console.log("Something went wrong. Let the user know.", err);

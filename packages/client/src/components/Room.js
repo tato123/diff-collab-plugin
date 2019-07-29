@@ -2,10 +2,10 @@ import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import Page from "./Page";
 import Video from "./Video";
-import Paper from "./Paper";
 import { Button, Select } from "antd";
 import Canvas from "./Canvas";
 import Image from "./Image";
+import useWindowSize from "../hooks/useWindowSize";
 
 const { Option } = Select;
 
@@ -20,7 +20,7 @@ const Container = styled.div`
 
 const Stage = styled.div`
   background: #fafafa;
-  overflow: auto;
+  overflow: hidden;
 `;
 
 const Toolbox = styled.div`
@@ -42,6 +42,8 @@ const Room = ({ match }) => {
   const [media, setMedia] = useState();
   const [selectedMedia, setSelectedMedia] = useState();
   const [zoom, setZoom] = useState("75%");
+  const [center, setCenter] = useState([0, 0]);
+  const size = useWindowSize();
 
   const handleChange = change => {
     console.log(change);
@@ -56,7 +58,14 @@ const Room = ({ match }) => {
         }
       })
       .then(media => {
-        console.log("media is", media);
+        const xMin = media.reduce((acc, m) => Math.min(acc, m.x), 0);
+        const xMax = media.reduce((acc, m) => Math.max(acc, m.x), 0);
+        const yMin = media.reduce((acc, m) => Math.min(acc, m.y), 0);
+        const yMax = media.reduce((acc, m) => Math.max(acc, m.y), 0);
+
+        const centerX = (xMin + xMax) / 2;
+        const centerY = (yMin + yMax) / 2;
+        setCenter([-centerX, -centerY]);
         setMedia(media);
         setSelectedMedia(media);
       })
@@ -69,17 +78,15 @@ const Room = ({ match }) => {
     <Page>
       <Container>
         <Stage>
-          {/* <Paper images={selectedMedia} zoom={zoom} /> */}
-
           <div>
-            <Canvas width={1920} height={1080}>
+            <Canvas width={size.width} height={size.height} center={center}>
               {selectedMedia &&
-                selectedMedia.map(media => (
+                selectedMedia.map((media, idx) => (
                   <Image
+                    key={idx}
                     url={media.url}
                     left={parseInt(media.x)}
                     top={parseInt(media.y)}
-                    scale={0.8}
                   />
                 ))}
             </Canvas>
