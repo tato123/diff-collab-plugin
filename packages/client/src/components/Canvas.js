@@ -1,10 +1,17 @@
 import React, { Fragment, useState, useEffect, useRef } from "react";
 import { fabric } from "fabric";
+import styled, { createGlobalStyle } from "styled-components";
+import "./canvas.css";
+
+const Canvas = styled.canvas`
+  cursor: url("/icon_pencil.png") 5 22, url("/icon_pencil.cur"), crosshair !important;
+`;
 
 const DesignCanvas = ({
   width = 600,
   height = 400,
   center = [0, 0],
+  drawingMode = true,
   children
 }) => {
   const [canvas, setCanvas] = useState();
@@ -19,7 +26,15 @@ const DesignCanvas = ({
   }, [canvas, width, height]);
 
   useEffect(() => {
+    if (canvas) {
+      canvas.isDrawingMode = drawingMode;
+    }
+  }, [canvas, drawingMode]);
+
+  useEffect(() => {
     const canvas = new fabric.Canvas(c.current);
+
+    canvas.freeDrawingBrush.width = 10;
 
     canvas.on("mouse:wheel", function(opt) {
       let e = opt.e;
@@ -36,12 +51,12 @@ const DesignCanvas = ({
         return;
       }
 
-      console.log(opt.e.deltaY);
-
       this.viewportTransform[4] += opt.e.deltaX;
       this.viewportTransform[5] += opt.e.deltaY;
-      this.requestRenderAll();
-      console.log(this.viewportTransform[4], this.viewportTransform[5]);
+
+      this.renderTop();
+      this.renderAll();
+
       opt.e.preventDefault();
       opt.e.stopPropagation();
     });
@@ -66,8 +81,11 @@ const DesignCanvas = ({
       }
     });
     canvas.on("mouse:up", function(opt) {
-      this.isDragging = false;
-      this.selection = true;
+      if (this.isDrawingMode) {
+      } else {
+        this.isDragging = false;
+        this.selection = true;
+      }
     });
 
     setCanvas(canvas);
@@ -91,7 +109,7 @@ const DesignCanvas = ({
   });
   return (
     <Fragment>
-      <canvas ref={c} />
+      <Canvas ref={c} />
       {canvas && mchildren}
     </Fragment>
   );

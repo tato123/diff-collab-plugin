@@ -1,39 +1,29 @@
-import React from "react";
-import PropTypes from "prop-types";
+import React, { useEffect } from "react";
 import _ from "lodash";
 import { fabric } from "fabric";
 
-class Image extends React.Component {
-  static propTypes = {
-    canvas: PropTypes.object,
-    url: PropTypes.string.isRequired,
-    scale: PropTypes.number.isRequired,
-    top: PropTypes.number.isRequired,
-    left: PropTypes.number
-  };
+const Image = ({ canvas, url, scale = 1.0, selectable, ...rest }) => {
+  useEffect(() => {
+    if (canvas) {
+      const options = _.omit(rest, ["scale"]);
+      fabric.Image.fromURL(
+        url,
+        img => {
+          img.scale(scale);
+          canvas.add(img);
+        },
+        {
+          left: options.left,
+          top: options.top,
+          hasControls: false,
+          lockMovementY: true,
+          lockMovementX: true
+        }
+      );
+    }
+  }, [canvas, rest, scale, url]);
 
-  static defaultProps = {
-    scale: 1.0
-  };
-
-  componentDidMount() {
-    const options = _.omit(this.props, ["scale"]);
-    fabric.Image.fromURL(
-      this.props.url,
-      img => {
-        img.scale(this.props.scale);
-        this.props.canvas.add(img);
-      },
-      {
-        left: options.left,
-        top: options.top
-      }
-    );
-  }
-
-  render() {
-    return null;
-  }
-}
+  return null;
+};
 
 export default Image;

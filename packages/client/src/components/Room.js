@@ -6,6 +6,9 @@ import { Button, Select } from "antd";
 import Canvas from "./Canvas";
 import Image from "./Image";
 import useWindowSize from "../hooks/useWindowSize";
+import { Icon } from "react-icons-kit";
+import { pencil } from "react-icons-kit/fa/pencil";
+import { mousePointer } from "react-icons-kit/fa/mousePointer";
 
 const { Option } = Select;
 
@@ -24,17 +27,14 @@ const Stage = styled.div`
 `;
 
 const Toolbox = styled.div`
-  height: 32px;
-  background: #fff;
-  border: 1px solid #eee;
+  height: 64px;
   position: absolute;
-  margin: 0 auto;
-  bottom: 16px;
-  right: 64px;
-  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
-  padding: 4px 16px;
+  padding: 8px 16px;
   display: block;
-  box-sizing: content-box;
+  top: 0px;
+  width: 100vw;
+  display: flex;
+  justify-content: center;
 `;
 
 const Room = ({ match }) => {
@@ -79,10 +79,16 @@ const Room = ({ match }) => {
       <Container>
         <Stage>
           <div>
-            <Canvas width={size.width} height={size.height} center={center}>
+            <Canvas
+              width={size.width}
+              height={size.height}
+              center={center}
+              drawingMode
+            >
               {selectedMedia &&
                 selectedMedia.map((media, idx) => (
                   <Image
+                    selectable={false}
                     key={idx}
                     url={media.url}
                     left={parseInt(media.x)}
@@ -93,20 +99,23 @@ const Room = ({ match }) => {
           </div>
         </Stage>
         <Toolbox>
-          <Button>Select</Button>
-          <Button>Draw</Button>
-          <Button>Rect</Button>
-
-          <Select
-            defaultValue="75%"
-            style={{ width: 120 }}
-            onChange={handleChange}
+          <Button
+            shape="circle"
+            style={{ width: 48, height: 48, marginRight: 8 }}
           >
-            <Option value="100%">100%</Option>
-            <Option value="75%">75%</Option>
-            <Option value="50%">50%</Option>
-            <Option value="25%">25%</Option>
-          </Select>
+            <Icon
+              icon={mousePointer}
+              size={16}
+              style={{ position: "absolute", top: "21%", left: "38%" }}
+            />
+          </Button>
+          <Button shape="circle" style={{ width: 48, height: 48 }}>
+            <Icon
+              icon={pencil}
+              size={17}
+              style={{ position: "absolute", top: "21%", left: "34%" }}
+            />
+          </Button>
         </Toolbox>
         <Video />
       </Container>
