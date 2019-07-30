@@ -41,7 +41,7 @@ const Room = ({ match }) => {
   const roomId = match.params.id;
   const [media, setMedia] = useState();
   const [selectedMedia, setSelectedMedia] = useState();
-  const [zoom, setZoom] = useState("75%");
+  const [zoom, setZoom] = useState(0.75);
   const [center, setCenter] = useState([0, 0]);
   const size = useWindowSize();
 
@@ -84,6 +84,7 @@ const Room = ({ match }) => {
               height={size.height}
               center={center}
               drawingMode
+              onZoom={setZoom}
             >
               {selectedMedia &&
                 selectedMedia.map((media, idx) => (
@@ -117,6 +118,19 @@ const Room = ({ match }) => {
             />
           </Button>
         </Toolbox>
+        <div
+          style={{
+            position: "absolute",
+            bottom: 10,
+            right: 10,
+            background: "#fff",
+            boxShadow: "0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23)",
+            padding: 8,
+            borderRadius: 8
+          }}
+        >
+          <label>{Math.round(100 * zoom)}%</label>
+        </div>
         <Video />
       </Container>
     </Page>

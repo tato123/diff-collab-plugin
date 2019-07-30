@@ -12,7 +12,8 @@ const DesignCanvas = ({
   height = 400,
   center = [0, 0],
   drawingMode = true,
-  children
+  children,
+  onZoom = () => {}
 }) => {
   const [canvas, setCanvas] = useState();
   const c = useRef();
@@ -34,6 +35,34 @@ const DesignCanvas = ({
   useEffect(() => {
     const canvas = new fabric.Canvas(c.current);
 
+    let group;
+    fabric.Image.fromURL("/icon_pencil.png", function(myImg) {
+      //i create an extra var for to change some image properties
+      var img1 = myImg.set({ left: -28, top: 28, width: 24, height: 24 });
+
+      var circle = new fabric.Circle({
+        radius: 24,
+        fill: "#171A3A",
+        scaleY: 1,
+        originX: "center",
+        originY: "center"
+      });
+
+      var text = new fabric.Text("JF", {
+        fontSize: 16,
+        fill: "#fff",
+        originX: "center",
+        originY: "center"
+      });
+
+      group = new fabric.Group([circle, text, img1], {
+        left: 150,
+        top: 100
+      });
+
+      // canvas.add(group);
+    });
+
     canvas.freeDrawingBrush.width = 10;
 
     canvas.on("mouse:wheel", function(opt) {
@@ -45,6 +74,8 @@ const DesignCanvas = ({
         let zoom = pzoom + delta / 1920;
         zoom =
           zoom > pzoom ? Math.max(pzoom - 0.1, 0.1) : Math.min(pzoom + 0.1, 2);
+
+        onZoom(zoom);
         canvas.zoomToPoint({ x: opt.pointer.x, y: opt.pointer.y }, zoom);
         opt.e.preventDefault();
         opt.e.stopPropagation();
@@ -70,6 +101,8 @@ const DesignCanvas = ({
         this.lastPosY = evt.clientY;
       }
     });
+    canvas.bringToFront(group);
+
     canvas.on("mouse:move", function(opt) {
       if (this.isDragging) {
         var e = opt.e;
@@ -79,6 +112,25 @@ const DesignCanvas = ({
         this.lastPosX = e.clientX;
         this.lastPosY = e.clientY;
       }
+
+      // transmitting my coordinates
+      console.log(`{x: ${opt.e.clientX}, y: ${opt.e.clientY}}`);
+
+      // if (group) {
+      //   group.bringToFront();
+      //   const z = canvas.getZoom();
+      //   group.scale(0.9 / z);
+
+      //   const p = canvas.getPointer(opt.e);
+      //   group.left = p.x;
+      //   group.top = p.y - 200;
+
+      //   canvas.requestRenderAll();
+      //   // group.zoom = 2;
+      //   // canvas.bringToFront(group);
+
+      //   // this.requestRenderAll();
+      // }
     });
     canvas.on("mouse:up", function(opt) {
       if (this.isDrawingMode) {
@@ -89,7 +141,7 @@ const DesignCanvas = ({
     });
 
     setCanvas(canvas);
-  }, []);
+  }, [onZoom]);
 
   useEffect(() => {
     if (canvas && center[0]) {
