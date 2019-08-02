@@ -1,16 +1,16 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import styled from "styled-components";
 import Page from "./Page";
 import Video from "./Video";
-import { Button, Select } from "antd";
+import { Button } from "antd";
 import Canvas from "./Canvas";
 import Image from "./Image";
 import useWindowSize from "../hooks/useWindowSize";
 import { Icon } from "react-icons-kit";
 import { pencil } from "react-icons-kit/fa/pencil";
 import { mousePointer } from "react-icons-kit/fa/mousePointer";
-
-const { Option } = Select;
+import Participants from "./Participants";
+import { useSync } from "../hooks/useToken";
 
 const Container = styled.div`
   display: grid;
@@ -43,12 +43,45 @@ const Room = ({ match }) => {
   const [selectedMedia, setSelectedMedia] = useState();
   const [zoom, setZoom] = useState(0.75);
   const [center, setCenter] = useState([0, 0]);
+  const syncClient = useSync();
+  const [p, setP] = useState({});
+  const [myId, setMyId] = useState();
+
   const size = useWindowSize();
 
-  const handleChange = change => {
-    console.log(change);
-    setZoom(change);
-  };
+  useEffect(() => {
+    if (roomId && syncClient) {
+      syncClient
+        .map(`${roomId}_p`)
+        .then(map => {
+          const p = Math.floor(Math.random() * 1000) + "_person";
+          setMyId(p)
+
+          map.set(p, { lastSeen: Date.now() });
+
+          map.on("itemUpdated", event => {
+            console.log("Received itemUpdated event: ", event);
+            const { key, value, isLocal } = event.item;
+            setP(pa => ({
+              ...pa,
+              [key]: value
+            }));
+          });
+
+          map.on("itemAdded", event => {
+            console.log("Received itemAdded event: ", event);
+            const { key, value, isLocal } = event.item;
+            setP(pa => ({
+              ...pa,
+              [key]: value
+            }));
+          });
+        })
+        .catch(function(error) {
+          console.log("Unexpected error", error);
+        });
+    }
+  }, [roomId, syncClient]);
 
   useEffect(() => {
     fetch(`${process.env.REACT_APP_API_SERVER}/room/${roomId}/media`)
@@ -86,6 +119,7 @@ const Room = ({ match }) => {
               drawingMode
               onZoom={setZoom}
             >
+              <Participants participants={p} myId={myId}/>
               {selectedMedia &&
                 selectedMedia.map((media, idx) => (
                   <Image
@@ -131,7 +165,7 @@ const Room = ({ match }) => {
         >
           <label>{Math.round(100 * zoom)}%</label>
         </div>
-        <Video />
+        {/* <Video /> */}
       </Container>
     </Page>
   );

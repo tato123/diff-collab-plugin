@@ -3,6 +3,8 @@ import { fabric } from "fabric";
 import styled, { createGlobalStyle } from "styled-components";
 import "./canvas.css";
 
+export const CanvasContext = React.createContext();
+
 const Canvas = styled.canvas`
   cursor: url("/icon_pencil.png") 5 22, url("/icon_pencil.cur"), crosshair !important;
 `;
@@ -13,7 +15,8 @@ const DesignCanvas = ({
   center = [0, 0],
   drawingMode = true,
   children,
-  onZoom = () => {}
+  onZoom = () => {},
+  onMouseMove = () => {}
 }) => {
   const [canvas, setCanvas] = useState();
   const c = useRef();
@@ -34,34 +37,6 @@ const DesignCanvas = ({
 
   useEffect(() => {
     const canvas = new fabric.Canvas(c.current);
-
-    let group;
-    fabric.Image.fromURL("/icon_pencil.png", function(myImg) {
-      //i create an extra var for to change some image properties
-      var img1 = myImg.set({ left: -28, top: 28, width: 24, height: 24 });
-
-      var circle = new fabric.Circle({
-        radius: 24,
-        fill: "#171A3A",
-        scaleY: 1,
-        originX: "center",
-        originY: "center"
-      });
-
-      var text = new fabric.Text("JF", {
-        fontSize: 16,
-        fill: "#fff",
-        originX: "center",
-        originY: "center"
-      });
-
-      group = new fabric.Group([circle, text, img1], {
-        left: 150,
-        top: 100
-      });
-
-      // canvas.add(group);
-    });
 
     canvas.freeDrawingBrush.width = 10;
 
@@ -101,7 +76,6 @@ const DesignCanvas = ({
         this.lastPosY = evt.clientY;
       }
     });
-    canvas.bringToFront(group);
 
     canvas.on("mouse:move", function(opt) {
       if (this.isDragging) {
@@ -112,25 +86,6 @@ const DesignCanvas = ({
         this.lastPosX = e.clientX;
         this.lastPosY = e.clientY;
       }
-
-      // transmitting my coordinates
-      console.log(`{x: ${opt.e.clientX}, y: ${opt.e.clientY}}`);
-
-      // if (group) {
-      //   group.bringToFront();
-      //   const z = canvas.getZoom();
-      //   group.scale(0.9 / z);
-
-      //   const p = canvas.getPointer(opt.e);
-      //   group.left = p.x;
-      //   group.top = p.y - 200;
-
-      //   canvas.requestRenderAll();
-      //   // group.zoom = 2;
-      //   // canvas.bringToFront(group);
-
-      //   // this.requestRenderAll();
-      // }
     });
     canvas.on("mouse:up", function(opt) {
       if (this.isDrawingMode) {
@@ -154,15 +109,10 @@ const DesignCanvas = ({
     }
   }, [canvas, center]);
 
-  const mchildren = React.Children.map(children, child => {
-    return React.cloneElement(child, {
-      canvas: canvas
-    });
-  });
   return (
     <Fragment>
       <Canvas ref={c} />
-      {canvas && mchildren}
+      <CanvasContext.Provider value={canvas}>{children}</CanvasContext.Provider>
     </Fragment>
   );
 };

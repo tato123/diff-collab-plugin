@@ -50,15 +50,6 @@ const TrackList = styled.div`
   flex: 1 auto;
 `;
 
-function getToken(identity) {
-  return fetch(`${process.env.REACT_APP_API_SERVER}/twilio/token`).then(res => {
-    if (!res.ok) {
-      throw new Error(res.status);
-    }
-    return res.json();
-  });
-}
-
 async function setupLocalAudioAndVideoTracks(video) {
   const audioAndVideoTrack = await createLocalTracks({
     audio: true,
@@ -71,17 +62,6 @@ async function setupLocalAudioAndVideoTracks(video) {
 const useRoomConnection = roomJoined => {
   const [token, setToken] = useState();
   const [localAudioVideoTracks, setLocalAudioVideoTracks] = useState();
-
-  useEffect(() => {
-    getToken()
-      .then(data => {
-        console.log("token data", data);
-        setToken(data.token);
-      })
-      .catch(err => {
-        console.error(err);
-      });
-  }, []);
 
   useEffect(() => {
     if (token) {
@@ -99,7 +79,7 @@ const useRoomConnection = roomJoined => {
           console.error("Error occured connecting to room", err);
         });
     }
-  }, [token]);
+  }, [roomJoined, token]);
 
   return [localAudioVideoTracks];
 };

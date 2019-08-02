@@ -1,8 +1,10 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useContext } from "react";
 import _ from "lodash";
 import { fabric } from "fabric";
+import { CanvasContext } from "./Canvas";
 
-const Image = ({ canvas, url, scale = 1.0, selectable, ...rest }) => {
+const Image = ({ url, scale = 1.0, selectable, ...rest }) => {
+  const canvas = useContext(CanvasContext);
   useEffect(() => {
     if (canvas) {
       const options = _.omit(rest, ["scale"]);

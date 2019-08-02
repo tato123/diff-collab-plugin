@@ -1,5 +1,6 @@
 var AccessToken = require("twilio").jwt.AccessToken;
 var VideoGrant = AccessToken.VideoGrant;
+var SyncGrant = AccessToken.SyncGrant;
 
 const express = require("express");
 const router = express.Router();
@@ -19,9 +20,15 @@ router.get("/token", function(request, response) {
   // Assign the generated identity to the token
   token.identity = identity;
 
-  const grant = new VideoGrant();
+  const videoGrant = new VideoGrant();
+
   // Grant token access to the Video API features
-  token.addGrant(grant);
+  token.addGrant(videoGrant);
+
+  const syncGrant = new SyncGrant({
+    serviceSid: process.env.TWILIO_SYNC_SERVICE_SID || "default"
+  });
+  token.addGrant(syncGrant);
 
   // Serialize the token to a JWT string and include it in a JSON response
   response.send({
