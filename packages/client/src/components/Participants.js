@@ -98,8 +98,11 @@ const Participants = ({ participants, myId }) => {
           console.log("Message value: ", args.message.value);
           console.log("args.isLocal:", args.isLocal);
 
-          const { isLocal, value } = args.message;
-          if (isLocal) return;
+          const { value } = args.message;
+          if (args.isLocal) {
+            return;
+          }
+          console.log("moving");
           mover(value);
         });
       }
