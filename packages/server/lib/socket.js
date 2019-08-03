@@ -1,8 +1,15 @@
 module.exports = io => {
-  io.on("connection", function(socket) {
-    socket.emit("news", { hello: "world" });
-    socket.on("my other event", function(data) {
-      console.log(data);
+  const dynamicNsp = io.of(/^\/room-\d+$/).on("connect", socket => {
+    const newNamespace = socket.nsp;
+
+    console.log("connection received", socket.id);
+    socket.on("mousemove", data => {
+      console.log("Sending data", data);
+      socket.broadcast.emit("mousemove", data);
+    });
+
+    socket.on("disconnect", () => {
+      console.log("disconnection occured", socket.id);
     });
   });
 };

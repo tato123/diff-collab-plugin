@@ -1,42 +1,28 @@
 import React, { useEffect, useState, useContext, useCallback } from "react";
 import _ from "lodash";
 import { fabric } from "fabric";
-import { useChannel } from "../hooks/useChannel";
+
 import { CanvasContext } from "./Canvas";
-import { useStream } from "../hooks/useToken";
+import useSocket from "../hooks/useSocket";
 
 var lastX;
 var lastY;
 var currentX;
 var currentY;
 
-const mode = "twillio";
-
 const Participants = ({ participants, myId }) => {
-  const channel = useChannel("private-canvas");
   const canvas = useContext(CanvasContext);
-  const stream = useStream("canvas-mouseEvents");
+  const socket = useSocket("room-123");
 
   const sendMessage = useCallback(() => {
-    const coord = { x: currentX, y: currentY };
-    if (mode === "pusher" && channel) {
-      channel.trigger("client-mouseEvent", coord);
-    } else if (mode === "twillio" && stream) {
-      stream
-        .publishMessage(coord)
-        .then(function(message) {
-          console.log(
-            "Stream publishMessage() successful, message SID:" + message.sid
-          );
-        })
-        .catch(function(error) {
-          console.error("Stream publishMessage() failed", error);
-        });
+    if (socket) {
+      const coord = { x: currentX, y: currentY };
+      socket.emit("mousemove", coord);
     }
-  }, [channel, stream]);
+  }, [socket]);
 
   useEffect(() => {
-    if (canvas && channel) {
+    if (canvas && socket) {
       let group;
 
       fabric.Image.fromURL("/icon_pencil.png", function(myImg) {
@@ -74,40 +60,18 @@ const Participants = ({ participants, myId }) => {
           group.scale(0.9 / z);
 
           const p = value;
-          group.animate("left", p.x + 40, {
-            onChange: canvas.renderAll.bind(canvas),
-            duration: 30
-          });
+          group.left = p.x + 40;
+          group.top = p.y - 400;
 
-          group.animate("top", p.y - 400, {
-            onChange: canvas.renderAll.bind(canvas),
-            duration: 30
-          });
+          canvas.requestRenderAll();
         }
       };
 
-      if (mode === "pusher") {
-        channel.bind("client-mouseEvent", data => {
-          mover(data);
-          console.log("Received messagePublished event: ", data);
-        });
-      } else if (mode === "twillio" && stream) {
-        stream.on("messagePublished", function(args) {
-          console.log("Stream message published");
-          console.log("Message SID: " + args.message.sid);
-          console.log("Message value: ", args.message.value);
-          console.log("args.isLocal:", args.isLocal);
-
-          const { value } = args.message;
-          if (args.isLocal) {
-            return;
-          }
-          console.log("moving");
-          mover(value);
-        });
-      }
+      socket.on("mousemove", msg => {
+        mover(msg);
+      });
     }
-  }, [canvas, channel, stream]);
+  }, [canvas, socket]);
 
   useEffect(() => {
     const animationTick = () => {
@@ -115,7 +79,7 @@ const Participants = ({ participants, myId }) => {
         lastX = currentX;
         lastY = currentY;
 
-        console.log("different", currentX, lastX, currentY, lastY);
+        // console.log("different", currentX, lastX, currentY, lastY);
         sendMessage();
       }
     };
@@ -129,7 +93,7 @@ const Participants = ({ participants, myId }) => {
         currentY = opt.absolutePointer.y;
       });
     }
-  }, [canvas, myId, channel]);
+  }, [canvas, myId]);
 
   return null;
 };
