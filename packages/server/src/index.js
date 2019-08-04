@@ -59,15 +59,16 @@ if (process.env.NODE_ENV === "stage" || process.env.NODE_ENV === "production") {
 }
 
 app.use(cors({ origin: true }));
-app.use("/", (req, res) => {
-  res.status(200).send("ok");
-});
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
+app.get("/", (req, res) => {
+  res.status(200).send("ok");
+});
+
 socket(io);
 
-const port = process.env.NODE_ENV === "development" ? 8001 : 8000;
+const port = process.env.PORT || 3000;
 
 app.use("/media", upload);
 app.use("/twilio", twilio);

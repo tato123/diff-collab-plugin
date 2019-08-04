@@ -1,3 +1,8 @@
+require("dotenv").config();
+
+const dbInstance = require("./db");
+dbInstance();
+
 const express = require("express");
 const cors = require("cors");
 const bodyParser = require("body-parser");
