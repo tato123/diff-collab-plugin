@@ -1,23 +1,23 @@
-import React, { useEffect, useState, useContext, useCallback } from "react";
-import _ from "lodash";
+import React, { useEffect, useContext, useCallback, useState } from "react";
 import { fabric } from "fabric";
 
 import { CanvasContext } from "./Canvas";
-import useSocket from "../hooks/useSocket";
+import { SocketContext } from "../../hooks/useSocket";
 
 var lastX;
 var lastY;
 var currentX;
 var currentY;
 
-const Participants = ({ participants, myId }) => {
+const MouseActivity = () => {
   const canvas = useContext(CanvasContext);
-  const socket = useSocket("room-123");
+  const socket = useContext(SocketContext);
 
   const sendMessage = useCallback(() => {
+    console.log("sending message", socket);
     if (socket) {
-      const coord = { x: currentX, y: currentY };
-      socket.emit("mousemove", coord);
+      const coord = { x: currentX, y: currentY, t: "mousemove" };
+      socket.emit("activity", coord);
     }
   }, [socket]);
 
@@ -67,11 +67,22 @@ const Participants = ({ participants, myId }) => {
         }
       };
 
-      socket.on("mousemove", msg => {
-        mover(msg);
+      socket.on("activity", msg => {
+        if (msg.t === "mousemove") {
+          mover(msg);
+        }
       });
     }
   }, [canvas, socket]);
+
+  useEffect(() => {
+    if (canvas) {
+      canvas.on("mouse:move", opt => {
+        currentX = opt.absolutePointer.x;
+        currentY = opt.absolutePointer.y;
+      });
+    }
+  }, [canvas]);
 
   useEffect(() => {
     const animationTick = () => {
@@ -86,16 +97,7 @@ const Participants = ({ participants, myId }) => {
     setInterval(animationTick, 25);
   }, [sendMessage]);
 
-  useEffect(() => {
-    if (canvas) {
-      canvas.on("mouse:move", opt => {
-        currentX = opt.absolutePointer.x;
-        currentY = opt.absolutePointer.y;
-      });
-    }
-  }, [canvas, myId]);
-
   return null;
 };
 
-export default Participants;
+export default MouseActivity;

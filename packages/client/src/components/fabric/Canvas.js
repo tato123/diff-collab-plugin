@@ -1,19 +1,17 @@
 import React, { Fragment, useState, useEffect, useRef } from "react";
 import { fabric } from "fabric";
-import styled, { createGlobalStyle } from "styled-components";
-import "./canvas.css";
+import styled from "styled-components";
 
 export const CanvasContext = React.createContext();
 
 const Canvas = styled.canvas`
-  cursor: url("/icon_pencil.png") 5 22, url("/icon_pencil.cur"), crosshair !important;
+  /* cursor: url("/icon_pencil.png") 5 22, url("/icon_pencil.cur"), crosshair !important; */
 `;
 
 const DesignCanvas = ({
   width = 600,
   height = 400,
   center = [0, 0],
-  drawingMode = true,
   children,
   onZoom = () => {},
   onMouseMove = () => {}
@@ -30,16 +28,9 @@ const DesignCanvas = ({
   }, [canvas, width, height]);
 
   useEffect(() => {
-    if (canvas) {
-      canvas.isDrawingMode = drawingMode;
-    }
-  }, [canvas, drawingMode]);
-
-  useEffect(() => {
     const canvas = new fabric.Canvas(c.current);
 
-    canvas.freeDrawingBrush.width = 10;
-
+    // zooming effect
     canvas.on("mouse:wheel", function(opt) {
       let e = opt.e;
 
@@ -88,11 +79,8 @@ const DesignCanvas = ({
       }
     });
     canvas.on("mouse:up", function(opt) {
-      if (this.isDrawingMode) {
-      } else {
-        this.isDragging = false;
-        this.selection = true;
-      }
+      this.isDragging = false;
+      this.selection = true;
     });
 
     setCanvas(canvas);

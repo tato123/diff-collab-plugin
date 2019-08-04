@@ -1,15 +1,22 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import io from "socket.io-client";
 
-const useSocket = nsp => {
-  const [socket, setSocket] = useState();
+export const SocketContext = React.createContext();
+
+const SocketProvider = ({ namespace, children }) => {
+  const [socket, setSocket] = useState(null);
 
   useEffect(() => {
-    const s = io(`http://localhost:8001/${nsp}`);
+    const url = namespace
+      ? `${process.env.REACT_APP_API_SERVER}/${namespace}`
+      : `${process.env.REACT_APP_API_SERVER}`;
+    const s = io(url);
     setSocket(s);
-  }, [nsp]);
+  }, [namespace]);
 
-  return socket;
+  return (
+    <SocketContext.Provider value={socket}>{children}</SocketContext.Provider>
+  );
 };
 
-export default useSocket;
+export default SocketProvider;

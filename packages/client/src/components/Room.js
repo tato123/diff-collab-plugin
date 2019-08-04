@@ -3,14 +3,16 @@ import styled from "styled-components";
 import Page from "./Page";
 import Video from "./Video";
 import { Button } from "antd";
-import Canvas from "./Canvas";
-import Image from "./Image";
+import Canvas from "./fabric/Canvas";
+import Image from "./fabric/Image";
 import useWindowSize from "../hooks/useWindowSize";
-import { Icon } from "react-icons-kit";
-import { pencil } from "react-icons-kit/fa/pencil";
-import { mousePointer } from "react-icons-kit/fa/mousePointer";
-import Participants from "./Participants";
+import SocketProvider from "../hooks/useSocket";
+
+import Participants from "./fabric/Participants";
+import MouseActivityListener from "./fabric/MouseActivity";
 import { useSync } from "../hooks/useToken";
+import Tool from "./Tool";
+import ActiveTool from "./fabric/tools";
 
 const Container = styled.div`
   display: grid;
@@ -43,45 +45,8 @@ const Room = ({ match }) => {
   const [selectedMedia, setSelectedMedia] = useState();
   const [zoom, setZoom] = useState(0.75);
   const [center, setCenter] = useState([0, 0]);
-  const syncClient = useSync();
-  const [p, setP] = useState({});
-  const [myId, setMyId] = useState();
-
+  const [activeTool, setActiveTool] = useState("select");
   const size = useWindowSize();
-
-  useEffect(() => {
-    if (roomId && syncClient) {
-      syncClient
-        .map(`${roomId}_p`)
-        .then(map => {
-          const p = Math.floor(Math.random() * 1000) + "_person";
-          setMyId(p)
-
-          map.set(p, { lastSeen: Date.now() });
-
-          map.on("itemUpdated", event => {
-            console.log("Received itemUpdated event: ", event);
-            const { key, value, isLocal } = event.item;
-            setP(pa => ({
-              ...pa,
-              [key]: value
-            }));
-          });
-
-          map.on("itemAdded", event => {
-            console.log("Received itemAdded event: ", event);
-            const { key, value, isLocal } = event.item;
-            setP(pa => ({
-              ...pa,
-              [key]: value
-            }));
-          });
-        })
-        .catch(function(error) {
-          console.log("Unexpected error", error);
-        });
-    }
-  }, [roomId, syncClient]);
 
   useEffect(() => {
     fetch(`${process.env.REACT_APP_API_SERVER}/room/${roomId}/media`)
@@ -109,64 +74,67 @@ const Room = ({ match }) => {
 
   return (
     <Page>
-      <Container>
-        <Stage>
-          <div>
-            <Canvas
-              width={size.width}
-              height={size.height}
-              center={center}
-              drawingMode
-              onZoom={setZoom}
-            >
-              <Participants participants={p} myId={myId}/>
-              {selectedMedia &&
-                selectedMedia.map((media, idx) => (
-                  <Image
-                    selectable={false}
-                    key={idx}
-                    url={media.url}
-                    left={parseInt(media.x)}
-                    top={parseInt(media.y)}
-                  />
-                ))}
-            </Canvas>
-          </div>
-        </Stage>
-        <Toolbox>
-          <Button
-            shape="circle"
-            style={{ width: 48, height: 48, marginRight: 8 }}
+      <SocketProvider namespace={`room-${roomId}`}>
+        <Container>
+          <Stage>
+            <div>
+              <Canvas
+                width={size.width}
+                height={size.height}
+                center={center}
+                drawingMode
+                onZoom={setZoom}
+              >
+                <ActiveTool tool={activeTool} />
+                <MouseActivityListener />
+                <Participants />
+                {selectedMedia &&
+                  selectedMedia.map((media, idx) => (
+                    <Image
+                      selectable={false}
+                      key={idx}
+                      url={media.url}
+                      left={parseInt(media.x)}
+                      top={parseInt(media.y)}
+                    />
+                  ))}
+              </Canvas>
+            </div>
+          </Stage>
+          <Toolbox>
+            <Tool
+              type="select"
+              active={activeTool === "select"}
+              action={() => setActiveTool("select")}
+            />
+            <Tool
+              type="pencil"
+              active={activeTool === "pencil"}
+              action={() => setActiveTool("pencil")}
+            />
+            <Tool
+              type="text"
+              active={activeTool === "text"}
+              action={() => setActiveTool("text")}
+            />
+          </Toolbox>
+          <div
+            style={{
+              position: "absolute",
+              bottom: 10,
+              right: 10,
+              background: "#fff",
+              boxShadow:
+                "0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23)",
+              padding: 8,
+              borderRadius: 8
+            }}
           >
-            <Icon
-              icon={mousePointer}
-              size={16}
-              style={{ position: "absolute", top: "21%", left: "38%" }}
-            />
-          </Button>
-          <Button shape="circle" style={{ width: 48, height: 48 }}>
-            <Icon
-              icon={pencil}
-              size={17}
-              style={{ position: "absolute", top: "21%", left: "34%" }}
-            />
-          </Button>
-        </Toolbox>
-        <div
-          style={{
-            position: "absolute",
-            bottom: 10,
-            right: 10,
-            background: "#fff",
-            boxShadow: "0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23)",
-            padding: 8,
-            borderRadius: 8
-          }}
-        >
-          <label>{Math.round(100 * zoom)}%</label>
-        </div>
-        {/* <Video /> */}
-      </Container>
+            <label>{Math.round(100 * zoom)}%</label>
+          </div>
+          {/* <Video /> */}
+        </Container>
+      </SocketProvider>
     </Page>
   );
 };

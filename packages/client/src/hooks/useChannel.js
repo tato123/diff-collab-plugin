@@ -4,7 +4,7 @@ import Pusher from "pusher-js";
 const pusher = new Pusher("91a64093ff1be24f878a", {
   cluster: "us2",
   forceTLS: true,
-  authEndpoint: "http://localhost:8001/pusher/auth"
+  authEndpoint: `${process.env.REACT_APP_API_SERVER}/pusher/auth`
 });
 
 Pusher.logToConsole = true;
