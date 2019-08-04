@@ -6,7 +6,10 @@ const createDynamooseInstance = () => {
     secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
     region: process.env.AWS_REGION
   });
-  dynamoose.local();
+
+  if (process.env.NODE_ENV === "development") {
+    dynamoose.local();
+  }
 };
 
 module.exports = async () => {
