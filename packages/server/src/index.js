@@ -9,7 +9,6 @@ const upload = require("./upload");
 const twilio = require("./twilio");
 const room = require("./room");
 const cors = require("cors");
-const pusher = require("./pusher");
 const bodyParser = require("body-parser");
 const socket = require("./socket");
 const socketio = require("socket.io");
@@ -68,12 +67,11 @@ app.get("/", (req, res) => {
 
 socket(io);
 
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 8001;
 
 app.use("/media", upload);
 app.use("/twilio", twilio);
 app.use("/room", room);
-app.use("/pusher", pusher);
 
 server.listen(port, () => {
   console.log("Listening on port", port);
