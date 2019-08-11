@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node src/index"
+    "start": "nodemon src/index"
   },
   "author": "",
   "license": "ISC",
@@ -18,6 +18,7 @@
     "express": "^4.17.1",
     "multer": "^1.4.1",
     "pusher": "^2.2.2",
+    "random-username-generator": "^1.0.4",
     "short-uuid": "^3.1.1",
     "socket.io": "^2.2.0",
     "socket.io-redis": "^5.2.0",

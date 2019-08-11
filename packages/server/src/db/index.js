@@ -7,7 +7,8 @@ const createDynamooseInstance = () => {
     region: process.env.AWS_REGION
   });
 
-  if (process.env.NODE_ENV === "development") {
+  if (process.env.NODE_ENV !== "production") {
+    console.log("Connecting to a local dynamo instance");
     dynamoose.local();
   }
 };

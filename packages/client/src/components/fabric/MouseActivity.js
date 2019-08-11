@@ -47,7 +47,10 @@ const MouseActivity = () => {
 
         group = new fabric.Group([circle, text], {
           left: 150,
-          top: 100
+          top: 100,
+          absolutePositioned: true,
+          originX: "left",
+          originY: "top"
         });
 
         canvas.add(group);
@@ -60,8 +63,8 @@ const MouseActivity = () => {
           group.scale(0.9 / z);
 
           const p = value;
-          group.left = p.x + 40;
-          group.top = p.y - 400;
+          group.left = p.x;
+          group.top = p.y;
 
           canvas.requestRenderAll();
         }

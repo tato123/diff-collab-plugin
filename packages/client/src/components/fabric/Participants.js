@@ -21,13 +21,24 @@ const Participants = ({ participants, myId }) => {
   const socket = useContext(SocketContext);
   const [el, setEl] = useState(null);
   const [actors, setActors] = useState({});
+  const [socketId, setSocketId] = useState(null);
 
   useEffect(() => {
     if (socket) {
       socket.emit("get:participants");
 
+      // save our id if alreayd available
+      if (socket.id) {
+        setSocketId(socket.id);
+      }
+
+      // otherwise wait for a connection
+      socket.on("connect", () => {
+        console.log("socketid", socket.id);
+        setSocketId(socket.id);
+      });
+
       socket.on("participants", p => {
-        console.log("participants", p);
         setActors(p);
       });
     }
@@ -46,7 +57,15 @@ const Participants = ({ participants, myId }) => {
       <ParticipantList>
         {Object.keys(actors).map(key => (
           <div key={key}>
-            <Avatar className="avatar" size={24} icon="user" />
+            <Avatar
+              className="avatar"
+              size="large"
+              style={{
+                background: actors[key].id === socketId ? "orange" : "#ccc"
+              }}
+            >
+              {actors[key].name.substring(0, 2)}
+            </Avatar>
           </div>
         ))}
       </ParticipantList>,
