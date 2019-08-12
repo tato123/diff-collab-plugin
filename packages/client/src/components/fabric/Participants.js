@@ -1,6 +1,7 @@
 import React, { useEffect, useContext, useState } from "react";
 import ReactDOM from "react-dom";
 import { Avatar } from "antd";
+import _ from "lodash";
 
 import { SocketContext } from "../../hooks/useSocket";
 import styled from "styled-components";
@@ -52,10 +53,17 @@ const Participants = ({ participants, myId }) => {
     setEl(el);
   }, []);
 
+  const OrderedActorKeys = actors => {
+    const keys = Object.keys(actors);
+    return _.sortBy(keys, key => {
+      return actors[key].id === socketId ? 0 : 1;
+    });
+  };
+
   if (el) {
     return ReactDOM.createPortal(
       <ParticipantList>
-        {Object.keys(actors).map(key => (
+        {OrderedActorKeys(actors).map(key => (
           <div key={key}>
             <Avatar
               className="avatar"

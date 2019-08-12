@@ -51,31 +51,13 @@ async function exportRendition(selection, documentRoot) {
 
     const res = await Axios.get(`${process.env.API_SERVER}/room/id`);
     const roomId = res.data;
-    console.log("room is", res.data);
 
-    // const data = new FormData();
-    // for (let i = 0; i < images.length; i++) {
-    //   data.append("image", images[i], images[i].name);
-    // }
-
-    // const roomUploadRes = await Axios.post(
-    //   `${process.env.API_SERVER}/media/${roomId}/upload`,
-    //   data,
-    //   {
-    //     headers: { "Content-Type": "multipart/form-data" }
-    //   }
-    // );
-    // console.log("Completed upload");
-    // shell.openExternal(`${process.env.WEB_URL}/room/${roomId}`);
-
-    //
-
-    images.forEach(async (image, idx) => {
+    const imageUploads = images.map((image, idx) => {
       const data = new FormData();
       data.append("image", image, image.name);
 
       const gb = renditions[idx].node.globalBounds;
-      const roomUploadRes = await Axios.post(
+      const roomUploadRes = Axios.post(
         `${process.env.API_SERVER}/media/${roomId}/media`,
         data,
         {
@@ -89,7 +71,9 @@ async function exportRendition(selection, documentRoot) {
         }
       );
       console.log(renditions[idx].node.name, gb.x, gb.y);
+      return roomUploadRes;
     });
+    await Promise.all(imageUploads);
 
     shell.openExternal(`${process.env.WEB_URL}/room/${roomId}`);
   } catch (err) {
@@ -132,6 +116,6 @@ function createDialog(filepath) {
 
 module.exports = {
   commands: {
-    createRectangle: exportRendition
+    createWhiteboard: exportRendition
   }
 };

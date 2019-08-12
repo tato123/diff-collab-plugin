@@ -1,16 +1,21 @@
 {
-  "id": "DIFF_COLLAB",
-  "name": "Diff Sharing",
+  "id": "82ce5713",
+  "name": "Diff Whiteboard",
   "host": {
     "app": "XD",
     "minVersion": "18.0.0"
   },
   "version": "1.0.0",
+  "icons": [
+    { "width": 24, "height": 24, "path": "images/icon@1x.png" },
+    { "width": 48, "height": 48, "path": "images/icon@2x.png" },
+    { "width": 96, "height": 96, "path": "images/icon@3x.png" }
+  ],
   "uiEntryPoints": [
     {
       "type": "menu",
-      "label": "Collaborate on Artboard",
-      "commandId": "createRectangle"
+      "label": "Send to Whiteboard",
+      "commandId": "createWhiteboard"
     }
   ]
 }

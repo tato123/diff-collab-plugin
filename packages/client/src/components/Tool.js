@@ -20,7 +20,7 @@ const StyledButton = styled(Button)`
   ${props =>
     props.active
       ? `
-    background: #434c5e !important;
+    background: #1890ff !important;
     color: #fff !important;
   `
       : ``}

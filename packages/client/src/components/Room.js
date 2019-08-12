@@ -39,6 +39,13 @@ const Toolbox = styled.div`
   justify-content: center;
 `;
 
+const FeedbackLeft = styled.div`
+  position: absolute;
+  top: 16px;
+  left: 8px;
+  z-index: 10;
+`;
+
 const Room = ({ match }) => {
   const roomId = match.params.id;
   const [media, setMedia] = useState();
@@ -76,6 +83,11 @@ const Room = ({ match }) => {
     <Page>
       <SocketProvider namespace={`room-${roomId}`}>
         <Container>
+          <FeedbackLeft>
+            <a data-az-l="ed59d268-6959-489e-97c0-ba42b693c069">
+              Leave Feedback
+            </a>
+          </FeedbackLeft>
           <Stage>
             <div>
               <Canvas
@@ -86,7 +98,7 @@ const Room = ({ match }) => {
                 onZoom={setZoom}
               >
                 <ActiveTool tool={activeTool} />
-                <MouseActivityListener />
+                {/* <MouseActivityListener /> */}
                 <Participants />
                 {selectedMedia &&
                   selectedMedia.map((media, idx) => (

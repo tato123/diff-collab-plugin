@@ -44,7 +44,10 @@ module.exports = {
     new Dotenv({
       path: ENV_FILE
     }),
-    new CopyWebpackPlugin(["src/manifest.json"]),
+    new CopyWebpackPlugin([
+      "src/manifest.json",
+      { from: "src/images", to: "images" }
+    ]),
     new AdobeXdPlugin()
   ]
 };
