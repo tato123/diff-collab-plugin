@@ -22,7 +22,12 @@ const storage = multer.memoryStorage({
 
 const multipleUpload = multer({ storage: storage }).array("image");
 
-const upload = multer({ storage: storage }).single("image");
+const limits = {
+  files: 1, // allow only 1 file per request
+  fileSize: 209715200 // 200 MB (max file size)
+};
+
+const upload = multer({ storage: storage, limits }).single("image");
 
 router.post("/:roomId/media", upload, async (req, res) => {
   try {
