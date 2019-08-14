@@ -1,8 +1,8 @@
 import React, { useEffect, useContext, useCallback, useState } from "react";
 import { fabric } from "fabric";
 
-import { CanvasContext } from "./Canvas";
-import { SocketContext } from "../../hooks/useSocket";
+import { CanvasContext } from "../Canvas";
+import { SocketContext } from "../../../hooks/useSocket";
 
 var lastX;
 var lastY;

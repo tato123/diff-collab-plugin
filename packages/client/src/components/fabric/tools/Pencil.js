@@ -17,6 +17,7 @@ export const PencilListener = () => {
     socket.on("activity", msg => {
       if (msg.t === type) {
         new fabric.Path.fromObject(msg.d, path => {
+          path.set("sync", false);
           canvas.add(path);
         });
       }

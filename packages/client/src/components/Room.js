@@ -9,7 +9,9 @@ import useWindowSize from "../hooks/useWindowSize";
 import SocketProvider from "../hooks/useSocket";
 
 import Participants from "./fabric/Participants";
-import MouseActivityListener from "./fabric/MouseActivity";
+import Listeners from "./fabric/listeners";
+import KeyboardCommands from "./fabric/keyboard";
+
 import { useSync } from "../hooks/useToken";
 import Tool from "./Tool";
 import ActiveTool from "./fabric/tools";
@@ -99,10 +101,13 @@ const Room = ({ match }) => {
               >
                 <ActiveTool tool={activeTool} />
                 {/* <MouseActivityListener /> */}
+                <Listeners />
+                <KeyboardCommands />
                 <Participants />
                 {selectedMedia &&
                   selectedMedia.map((media, idx) => (
                     <Image
+                      sync={false}
                       selectable={false}
                       key={idx}
                       url={media.url}

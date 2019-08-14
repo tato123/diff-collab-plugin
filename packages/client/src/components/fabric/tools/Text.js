@@ -30,6 +30,7 @@ export const TextListener = () => {
     socket.on("activity", msg => {
       if (msg.t === "text") {
         new fabric.Text.fromObject(msg.d, text => {
+          text.set("sync", false);
           canvas.add(text);
         });
       }

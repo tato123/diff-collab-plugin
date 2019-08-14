@@ -3,7 +3,7 @@ import _ from "lodash";
 import { fabric } from "fabric";
 import { CanvasContext } from "./Canvas";
 
-const Image = ({ url, scale = 1.0, selectable, ...rest }) => {
+const Image = ({ url, scale = 1.0, selectable, sync = true, ...rest }) => {
   const canvas = useContext(CanvasContext);
   useEffect(() => {
     if (canvas) {
@@ -19,11 +19,12 @@ const Image = ({ url, scale = 1.0, selectable, ...rest }) => {
           top: options.top,
           hasControls: false,
           lockMovementY: true,
-          lockMovementX: true
+          lockMovementX: true,
+          sync
         }
       );
     }
-  }, [canvas, rest, scale, url]);
+  }, [canvas, rest, scale, sync, url]);
 
   return null;
 };
