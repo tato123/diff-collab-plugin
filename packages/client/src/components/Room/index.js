@@ -1,20 +1,21 @@
 import React, { useEffect, useState, useCallback } from "react";
 import styled from "styled-components";
-import Page from "./Page";
-import Video from "./Video";
+import Page from "../Page";
+import Video from "../Video";
 import { Button } from "antd";
-import Canvas from "./fabric/Canvas";
-import Image from "./fabric/Image";
-import useWindowSize from "../hooks/useWindowSize";
-import SocketProvider from "../hooks/useSocket";
+import Canvas from "../fabric/Canvas";
+import Image from "../fabric/Image";
 
-import Participants from "./fabric/Participants";
-import Listeners from "./fabric/listeners";
-import KeyboardCommands from "./fabric/keyboard";
+import Participants from "../fabric/Participants";
+import Listeners from "../fabric/listeners";
+import KeyboardCommands from "../fabric/keyboard";
 
-import { useSync } from "../hooks/useToken";
-import Tool from "./Tool";
-import ActiveTool from "./fabric/tools";
+import { useSync } from "../../hooks/useToken";
+import SocketProvider from "../../hooks/useSocket";
+import useWindowSize from "../../hooks/useWindowSize";
+
+import Tool from "../Tool";
+import ActiveTool from "../fabric/tools";
 
 const Container = styled.div`
   display: grid;

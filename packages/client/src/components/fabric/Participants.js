@@ -1,6 +1,6 @@
 import React, { useEffect, useContext, useState } from "react";
 import ReactDOM from "react-dom";
-import { Avatar } from "antd";
+import { Avatar, Tooltip } from "antd";
 import _ from "lodash";
 
 import { SocketContext } from "../../hooks/useSocket";
@@ -65,15 +65,13 @@ const Participants = ({ participants, myId }) => {
       <ParticipantList>
         {OrderedActorKeys(actors).map(key => (
           <div key={key}>
-            <Avatar
-              className="avatar"
-              size="large"
-              style={{
-                background: actors[key].id === socketId ? "orange" : "#ccc"
-              }}
-            >
-              {actors[key].name.substring(0, 2)}
-            </Avatar>
+            <Tooltip title={actors[key].email} placement="bottom">
+              <Avatar
+                className="avatar"
+                size="large"
+                src={actors[key].picture}
+              />
+            </Tooltip>
           </div>
         ))}
       </ParticipantList>,

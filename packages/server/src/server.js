@@ -5,6 +5,7 @@ const express = require("express");
 
 const upload = require("./upload");
 const twilio = require("./twilio");
+const auth = require("./routes/auth");
 const room = require("./room");
 const cors = require("cors");
 const bodyParser = require("body-parser");
@@ -55,7 +56,7 @@ if (process.env.NODE_ENV === "stage" || process.env.NODE_ENV === "production") {
   io.adapter(redisAdapter({ host: redisServer, port: 6379 }));
 }
 
-app.use(cors({ origin: true }));
+app.use("*", cors({ origin: true }));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 
@@ -70,6 +71,7 @@ const port = process.env.PORT || 8001;
 app.use("/media", upload);
 app.use("/twilio", twilio);
 app.use("/room", room);
+app.use("/auth", auth);
 
 server.listen(port, () => {
   console.log("Listening on port", port);
