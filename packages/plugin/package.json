@@ -19,6 +19,7 @@
     "@adobe/xdpm": "^1.1.2",
     "@babel/cli": "^7.1.5",
     "@babel/core": "^7.1.6",
+    "@babel/plugin-proposal-class-properties": "^7.5.5",
     "@babel/preset-env": "^7.1.6",
     "@types/adobexd": "https://github.com/tato123/typings",
     "babel-loader": "^8.0.4",
