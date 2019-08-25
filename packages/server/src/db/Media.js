@@ -11,6 +11,8 @@ const schema = new Schema({
   created: Date,
   roomId: String,
   url: String,
+  guid: String,
+  version: Number,
   x: String,
   y: String,
   w: String,
