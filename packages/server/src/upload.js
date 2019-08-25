@@ -5,6 +5,7 @@ const AWS = require("aws-sdk");
 const short = require("short-uuid");
 const Room = require("./db/Room");
 const Media = require("./db/Media");
+const MediaHistory = require("./db/MediaHistory");
 
 const S3 = new AWS.S3({
   accessKeyId: process.env.AWS_ACCESS_KEY_ID,
@@ -20,8 +21,6 @@ const storage = multer.memoryStorage({
   }
 });
 
-const multipleUpload = multer({ storage: storage }).array("image");
-
 const limits = {
   files: 1, // allow only 1 file per request
   fileSize: 209715200 // 200 MB (max file size)
@@ -29,18 +28,29 @@ const limits = {
 
 const upload = multer({ storage: storage, limits }).single("image");
 
+const getNextVersion = async id => {
+  try {
+    const media = await Media.get(id);
+
+    return media.version + 1;
+  } catch (err) {
+    // creating a new object
+    return 1;
+  }
+};
+
 router.post("/:roomId/media", upload, async (req, res) => {
   try {
     console.log("----------------[upload media]-------------");
     console.log("[query]", req.query);
     const roomId = req.params.roomId;
+    const guid = req.query.guid;
+
     console.log("RoomID: ", roomId);
     const item = req.file;
     const created = Date.now();
 
-    // generate a short name
-    const mediaId = short.generate();
-    const newFileName = `${mediaId}-${item.originalname}`;
+    const newFileName = `${roomId}/${item.originalname}`;
 
     // upload a file
     const params = {
@@ -56,12 +66,11 @@ router.post("/:roomId/media", upload, async (req, res) => {
           console.error(err);
           reject(err);
         } else if (data) {
-          const fileURL = `https://s3.amazonaws.com/${BUCKET_NAME}/${newFileName}`;
           // get the urls
-          console.log("File successfully uploaded...", fileURL);
+          console.log("File successfully uploaded...", data);
           resolve({
-            mediaId: mediaId,
-            url: fileURL,
+            url: data.Location,
+            versionId: data.VersionId,
             ...req.query
           });
         }
@@ -70,18 +79,39 @@ router.post("/:roomId/media", upload, async (req, res) => {
 
     const result = await uploadPromise;
 
-    Media.create(
-      { roomId: roomId, created: created, id: mediaId, ...result },
-      err => {
-        if (err) {
-          console.error("An error occured updating room", err);
-          res.status(400).send(err);
-        } else {
-          console.log("Succesfully updated room");
-          res.status(200).send();
-        }
-      }
-    );
+    // get the current media for id
+    const version = await getNextVersion(guid);
+
+    // write a media history row
+    await MediaHistory.create({
+      id: guid,
+      created,
+      versionId: result.versionId,
+      version
+    });
+
+    // creating a new version
+    if (version === 1) {
+      await Media.create({
+        id: guid,
+        roomId,
+        created,
+        version,
+        ...result
+      });
+    }
+    // otherwise update
+    else {
+      await Media.update({
+        id: guid,
+        roomId,
+        created,
+        version,
+        ...result
+      });
+    }
+
+    res.status(200).send();
   } catch (err) {
     console.error(err);
     res.status(400).send("err");

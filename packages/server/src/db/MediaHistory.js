@@ -8,17 +8,15 @@ const schema = new Schema({
     required: true,
     hashKey: true
   },
+  version: {
+    type: Number,
+    rangeKey: true,
+    index: true
+  },
   created: Date,
-  roomId: String,
-  url: String,
-  version: Number,
-  versionId: String,
-  x: String,
-  y: String,
-  w: String,
-  h: String
+  versionId: String
 });
 
-const Model = dynamoose.model("Media", schema);
+const Model = dynamoose.model("MediaHistory", schema);
 
 module.exports = Model;
