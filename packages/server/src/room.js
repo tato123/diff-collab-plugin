@@ -20,6 +20,15 @@ router.get("/id", async (req, res) => {
   }
 });
 
+router.get("/:id", async (req, res) => {
+  try {
+    const media = await Media.get(req.params.id);
+    res.status(200).send(media);
+  } catch (err) {
+    res.status(404).send();
+  }
+});
+
 router.get("/:id/media", async (req, res) => {
   try {
     const roomId = req.params.id;

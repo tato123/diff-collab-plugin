@@ -9,6 +9,10 @@ const schema = new Schema({
     hashKey: true
   },
   created: Date,
+  creator: {
+    type: String,
+    default: ""
+  },
   roomId: String,
   url: String,
   version: Number,

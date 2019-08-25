@@ -13,6 +13,10 @@ const schema = new Schema({
     rangeKey: true,
     index: true
   },
+  creator: {
+    type: String,
+    default: ""
+  },
   created: Date,
   versionId: String
 });

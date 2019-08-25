@@ -8,7 +8,11 @@ const schema = new Schema({
     required: true,
     hashKey: true
   },
-  created: Date
+  created: Date,
+  creator: {
+    type: String,
+    default: ""
+  }
 });
 
 const Model = dynamoose.model("Room", schema);
