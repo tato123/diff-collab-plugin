@@ -3,6 +3,7 @@ const router = express.Router();
 const Room = require("./db/Room");
 const Media = require("./db/Media");
 const short = require("short-uuid");
+const _ = require("lodash");
 
 // Endpoint to generate access token
 router.get("/id", async (req, res) => {
@@ -22,8 +23,13 @@ router.get("/id", async (req, res) => {
 
 router.get("/:id", async (req, res) => {
   try {
-    const media = await Media.get(req.params.id);
-    res.status(200).send(media);
+    const room = await Room.get(req.params.id);
+
+    console.log("[room check]", req.params.id, "value", room);
+    if (_.isNil(room)) {
+      return res.status(404).send();
+    }
+    res.status(200).send(room);
   } catch (err) {
     res.status(404).send();
   }

@@ -7,7 +7,17 @@ const fetchRoomId = async () => {
   return roomId;
 };
 
-const getPluginDataValue = (documentRoot, key) => {
+const isValidRoomId = async roomId => {
+  try {
+    const res = await Axios.get(`${process.env.API_SERVER}/room/${roomId}`);
+    console.log("response is", res);
+    return true;
+  } catch (err) {
+    return false;
+  }
+};
+
+const getPluginDataValue = async (documentRoot, key) => {
   let value;
 
   // try to fetch a room id
@@ -16,7 +26,12 @@ const getPluginDataValue = (documentRoot, key) => {
     value = val[key] || null;
   }
 
-  return value;
+  if (value && !(await isValidRoomId(value))) {
+    console.warn("RoomId does not exist", value);
+    return [null, "not-exist"];
+  }
+
+  return [value];
 };
 
 const storePluginDataValue = (documentRoot, key, value) => {
@@ -31,14 +46,21 @@ const storePluginDataValue = (documentRoot, key, value) => {
 };
 
 const getRoomId = async documentRoot => {
-  let roomId = getPluginDataValue(documentRoot, "roomId");
+  let [roomId, reason] = await getPluginDataValue(documentRoot, "roomId");
 
   // if not we need to give the user the option to select
   // a project to upload to or set a roomid
-  const options = await getUserOptions(roomId);
+  const options = await getUserOptions(roomId, reason);
+
+  // user would like us to cancel
+  if (options.which === 0) {
+    return { roomId: null, didCancel: true };
+  }
+
   const { share_settings } = options.value;
   console.log("user selected", share_settings);
 
+  // attempt to use the existing room that does exist
   if (share_settings === "existing" && roomId) {
     console.log("Reusing existing roomid", roomId);
     return { roomId };
@@ -50,7 +72,7 @@ const getRoomId = async documentRoot => {
   storePluginDataValue(documentRoot, "roomId", roomId);
   console.log("New roomid", roomId);
 
-  return { roomId };
+  return { roomId, didCancel: false };
 };
 
 module.exports = getRoomId;

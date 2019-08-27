@@ -18,9 +18,11 @@ const handleCreateWhiteboard = async (selection, documentRoot) => {
   try {
     await firstTime();
     // start by getting a unique id or asking the user to select an account
-    const { roomId } = await getRoomOptions(documentRoot);
+    const { roomId, didCancel } = await getRoomOptions(documentRoot);
 
-    await exportArtboards(selection, documentRoot, roomId);
+    if (!didCancel) {
+      await exportArtboards(selection, documentRoot, roomId);
+    }
   } catch (err) {
     console.error("[Diff][error]", error);
     await displayFallbackError();

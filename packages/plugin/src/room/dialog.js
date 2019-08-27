@@ -1,7 +1,13 @@
 const { createDialog } = require("../lib/dialogs");
 
 const debugMode = false;
-const showOurDialog = roomId => {
+const showOurDialog = (roomId, reason) => {
+  let errorMessage = "";
+  if (!roomId && reason === "not-exist") {
+    errorMessage =
+      "The previously used whiteboard does not exist. It may have been deleted";
+  }
+
   return createDialog({
     title: "Whiteboard",
     template: () => `
@@ -77,6 +83,13 @@ const showOurDialog = roomId => {
           opacity: 0.6;
           cursor: not-allowed;
         }
+
+        .error {
+          color: red;
+          margin-left: 26px;
+          margin-top: 8px;
+          font-size: 12px;
+        }
    
       </style>
       <div class="inner-container">
@@ -98,6 +111,7 @@ const showOurDialog = roomId => {
                   <span for="existingOption">Existing Whiteboard</span>
                 </label>
                 <span class="help">Updates existing artboards and adds any new artboards to an existing whiteboard</span>
+                ${errorMessage && `<span class="error">${errorMessage} </span>`}
               </div>
             
 
