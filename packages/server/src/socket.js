@@ -1,8 +1,47 @@
 const jwt = require("jsonwebtoken");
+const Participant = require("./db/Participant");
 
 const participants = {};
 
 const synced = {};
+
+const toParticipantKey = (room, socketId) => {
+  return room + ";" + socketId;
+};
+
+const addParticipant = async (room, socketId, user) => {
+  try {
+    const partcipant = new Participant({
+      roomSocket: toParticipantKey(room, socketId),
+      user: JSON.stringify(Object.assign({}, user, { socketId, room }))
+    });
+
+    await partcipant.save();
+  } catch (error) {
+    console.error("Unable to save", error);
+  }
+};
+
+const getParticipants = async room => {
+  try {
+    const results = await Participant.scan({
+      roomSocket: { contains: room }
+    }).exec();
+    const participants = results.map(r => JSON.parse(r.user));
+    console.log("Results of get partcipants", participants);
+    return participants;
+  } catch (err) {
+    console.error("Error fetching participants", err);
+  }
+};
+
+const deleteParticipant = async (room, socketId) => {
+  try {
+    await Participant.delete({ roomSocket: toParticipantKey(room, socketId) });
+  } catch (err) {
+    console.error("Error removing partcipant", err);
+  }
+};
 
 module.exports = io => {
   const dynamicNsp = io
@@ -21,7 +60,7 @@ module.exports = io => {
       }
     })
 
-    .on("connect", socket => {
+    .on("connect", async socket => {
       console.log("[connect] token is", socket.decoded);
       const user = socket.decoded;
       const newNamespace = socket.nsp;
@@ -30,15 +69,9 @@ module.exports = io => {
 
       console.log("namespace is ", room, user.email);
 
-      if (!participants[room]) {
-        participants[room] = {};
-      }
+      await addParticipant(room, socket.id, user);
 
-      participants[room][socket.id] = Object.assign({}, user, {
-        id: socket.id
-      });
-
-      socket.broadcast.emit("participants", participants[room]);
+      socket.broadcast.emit("participants", await getParticipants(room));
 
       console.log("connection received", socket.id);
 
@@ -49,8 +82,8 @@ module.exports = io => {
       });
 
       // user is requesting our participants
-      socket.on("get:participants", () => {
-        socket.emit("participants", participants[room]);
+      socket.on("get:participants", async () => {
+        socket.emit("participants", await getParticipants(room));
       });
 
       // get all the synced activities
@@ -77,10 +110,9 @@ module.exports = io => {
       });
 
       //
-      socket.on("disconnect", () => {
-        const obj = participants[room];
-        delete obj[socket.id];
-        socket.broadcast.emit("participants", participants[room]);
+      socket.on("disconnect", async () => {
+        await deleteParticipant(room, socket.id);
+        socket.broadcast.emit("participants", await getParticipants(room));
         console.log("disconnection occured", socket.id);
       });
     });

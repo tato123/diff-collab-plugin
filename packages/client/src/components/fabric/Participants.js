@@ -54,22 +54,21 @@ const Participants = ({ participants, myId }) => {
   }, []);
 
   const OrderedActorKeys = actors => {
-    const keys = Object.keys(actors);
-    return _.sortBy(keys, key => {
-      return actors[key].id === socketId ? 0 : 1;
+    return _.sortBy(actors, actor => {
+      return actor.socketId === socketId ? 0 : 1;
     });
   };
 
   if (el) {
     return ReactDOM.createPortal(
       <ParticipantList>
-        {OrderedActorKeys(actors).map(key => (
-          <div key={key}>
-            <Tooltip title={actors[key].email} placement="bottom">
+        {OrderedActorKeys(actors).map(actor => (
+          <div key={actor.socketId}>
+            <Tooltip title={actor.email} placement="bottom">
               <Avatar
                 className="avatar"
                 size="large"
-                src={actors[key].picture}
+                src={actor.picture}
               />
             </Tooltip>
           </div>
