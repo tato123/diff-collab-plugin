@@ -1,7 +1,6 @@
 const jwt = require("jsonwebtoken");
 const Participant = require("./db/Participant");
-
-const participants = {};
+const RoomSync = require("./db/RoomSync");
 
 const synced = {};
 
@@ -9,10 +8,15 @@ const toParticipantKey = (room, socketId) => {
   return room + ";" + socketId;
 };
 
+const toRoomSyncKey = (room, dataId) => {
+  return room + ";" + dataId;
+};
+
 const addParticipant = async (room, socketId, user) => {
   try {
     const partcipant = new Participant({
       roomSocket: toParticipantKey(room, socketId),
+      created: Date.now(),
       user: JSON.stringify(Object.assign({}, user, { socketId, room }))
     });
 
@@ -40,6 +44,33 @@ const deleteParticipant = async (room, socketId) => {
     await Participant.delete({ roomSocket: toParticipantKey(room, socketId) });
   } catch (err) {
     console.error("Error removing partcipant", err);
+  }
+};
+
+const createRoomSync = async (room, data) => {
+  try {
+    const sync = new RoomSync({
+      roomData: toRoomSyncKey(room, data.o.id),
+      created: Date.now(),
+      data: JSON.stringify(data)
+    });
+
+    await sync.save();
+  } catch (error) {
+    console.error("Unable to create RoomSync", error);
+  }
+};
+
+const getRoomSync = async room => {
+  try {
+    const results = await RoomSync.scan({
+      roomData: { contains: room }
+    }).exec();
+    const syncs = results.map(r => JSON.parse(r.data));
+    console.log("Results of get syncs", syncs);
+    return syncs;
+  } catch (err) {
+    console.error("Error fetching room sync", err);
   }
 };
 
@@ -87,23 +118,15 @@ module.exports = io => {
       });
 
       // get all the synced activities
-      socket.on("get:synced", () => {
+      socket.on("get:synced", async () => {
         // emit whatever was synced
-        socket.emit("synced", synced[room]);
+        socket.emit("synced", await getRoomSync(room));
       });
 
       // persist the data before re-broadcasting
       // each message should have an id
-      socket.on("sync:activity", data => {
-        if (!synced[room]) {
-          synced[room] = {};
-        }
-
-        console.log("Syncing activity", data);
-
-        // naive algorithm for storage
-        // assumes that it's a one way write, last one in wins
-        synced[room][data.o.id] = data;
+      socket.on("sync:activity", async data => {
+        await createRoomSync(room, data);
 
         // broadcast out as a plain activity
         socket.broadcast.emit("activity", data);

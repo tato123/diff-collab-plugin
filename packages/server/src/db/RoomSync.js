@@ -3,15 +3,15 @@ const dynamoose = require("dynamoose");
 const Schema = dynamoose.Schema;
 
 const schema = new Schema({
-  roomSocket: {
+  roomData: {
     type: String,
     required: true,
     hashKey: true
   },
   created: Date,
-  user: String
+  data: String
 });
 
-const Model = dynamoose.model("Participant", schema);
+const Model = dynamoose.model("RoomSync", schema);
 
 module.exports = Model;
