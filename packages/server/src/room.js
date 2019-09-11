@@ -2,7 +2,6 @@ const express = require("express");
 const router = express.Router();
 const Room = require("./db/Room");
 const Media = require("./db/Media");
-const short = require("short-uuid");
 const _ = require("lodash");
 
 // Endpoint to generate access token

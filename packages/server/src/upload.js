@@ -2,7 +2,6 @@ const express = require("express");
 const router = express.Router();
 const multer = require("multer");
 const AWS = require("aws-sdk");
-const short = require("short-uuid");
 const Room = require("./db/Room");
 const Media = require("./db/Media");
 const MediaHistory = require("./db/MediaHistory");
