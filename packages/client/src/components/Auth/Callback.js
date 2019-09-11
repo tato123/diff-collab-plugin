@@ -16,10 +16,12 @@ const AuthCallback = ({ location, match }) => {
 
     localStorage.setItem("accessToken", accessToken);
     localStorage.setItem("idToken", idToken);
-
     localStorage.setItem("user", JSON.stringify(user));
 
-    setRedirectTo("/");
+    // get a redirect
+    const redirectTo = localStorage.getItem("redirectTo") || "/";
+    localStorage.removeItem("redirectTo");
+    setRedirectTo(redirectTo);
   }, [location.search]);
 
   if (redirectTo) {

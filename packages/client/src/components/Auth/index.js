@@ -3,7 +3,11 @@ import { Redirect } from "react-router";
 import { Row, Col, Form, Icon, Input, Button, Checkbox } from "antd";
 import _ from "lodash";
 
-const Auth = () => {
+const Auth = ({ match, location }) => {
+  const searchParams = new URLSearchParams(location.search);
+  const redirectTo = searchParams.get("redirectTo") || "/";
+  localStorage.setItem("redirectTo", redirectTo);
+
   const isAuthenticated = () => {
     // get the access token
     const accessToken = localStorage.getItem("accessToken");
@@ -20,7 +24,7 @@ const Auth = () => {
       <Col span={8}>
         <form
           method="get"
-          action="http://localhost:8001/auth/guest"
+          action={`${process.env.REACT_APP_API_SERVER}/auth/guest`}
           className="login-form"
         >
           <Form.Item>

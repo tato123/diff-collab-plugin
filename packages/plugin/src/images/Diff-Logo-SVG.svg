@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="486" height="133" viewBox="0 0 486 133">
+  <defs>
+    <clipPath id="clip-custom_2">
+      <rect width="486" height="133"/>
+    </clipPath>
+  </defs>
+  <g id="custom_2" data-name="custom – 2" clip-path="url(#clip-custom_2)">
+    <g id="difflogo" transform="translate(-11.293 -15.35)">
+      <path id="Path_9" data-name="Path 9" d="M93.35,81.734H38.126a5.843,5.843,0,0,1-5.032-8.774L60.707,26.2a5.809,5.809,0,0,1,10,0L98.32,72.959A5.8,5.8,0,0,1,93.35,81.734Z" transform="translate(-7.947 18.383)" fill="none" stroke="#171a3a" stroke-width="3" stroke-dasharray="4 4"/>
+      <g id="Group_1" data-name="Group 1">
+        <path id="Path_1" data-name="Path 1" d="M191.4,44.6a9.282,9.282,0,0,1,9.3-9.3h13.1c14.2,0,25.2,2.3,33.5,8,9.8,6.8,15.3,18,15.3,31.7,0,12.5-4.7,23.2-13.2,30.2-8.1,6.6-19.6,9.8-36.3,9.8H200.8a9.282,9.282,0,0,1-9.3-9.3V44.6Zm22.4,55.1c11.3,0,18.6-2,23.5-6.3C242,89.3,245,83,245,75c0-8.4-3.3-15.4-9.2-19.6-5.6-4-13.2-4.8-22.1-4.8H209V99.7Z" fill="#171a3a"/>
+        <path id="Path_2" data-name="Path 2" d="M293.3,35.4h17.5V115H293.3Z" fill="#171a3a"/>
+        <path id="Path_3" data-name="Path 3" d="M354.7,35.4H396V50.7H363V67.9h28.4V82.4H363V115H345.5V44.6A9.113,9.113,0,0,1,354.7,35.4Z" fill="#171a3a"/>
+        <path id="Path_4" data-name="Path 4" d="M437.1,35.4h41.3V50.7h-33V67.9h28.4V82.4H445.4V115H427.9V44.6A9.113,9.113,0,0,1,437.1,35.4Z" fill="#171a3a"/>
+      </g>
+      <path id="Path_5" data-name="Path 5" d="M113.368,100.875H40.039a7.758,7.758,0,0,1-6.681-11.651L70.022,27.139a7.714,7.714,0,0,1,13.281,0l36.664,62.085A7.7,7.7,0,0,1,113.368,100.875Z" transform="translate(-0.907 13.812)" fill="#00c9d8"/>
+      <path id="Path_6" data-name="Path 6" d="M146,128H56a9.522,9.522,0,0,1-8.2-14.3l45-76.2a9.467,9.467,0,0,1,16.3,0l45,76.2A9.416,9.416,0,0,1,146,128Z" fill="#4648b0"/>
+      <path id="Path_8" data-name="Path 8" d="M146,128H68.526l55.16-65.8L154.1,113.7A9.416,9.416,0,0,1,146,128Z" fill="#aa5cad"/>
+      <path id="Path_7" data-name="Path 7" d="M146,128H96.211l46.248-34.013L154.1,113.7A9.416,9.416,0,0,1,146,128Z" fill="#e34fb6"/>
+    </g>
+  </g>
+</svg>
